@@ -1,13 +1,18 @@
 package bgty.vt_41.bi.web;
 
+import bgty.vt_41.bi.entity.domain.Playlist;
+import bgty.vt_41.bi.entity.domain.Rating;
 import bgty.vt_41.bi.entity.domain.User;
+import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.dto.AuthUserResult;
 import bgty.vt_41.bi.entity.dto.ORReject;
 import bgty.vt_41.bi.entity.dto.OperationResult;
 import bgty.vt_41.bi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @RestController
@@ -16,7 +21,6 @@ public class UserController {
     @Autowired
     UserRepository userRepository;
 
-    //@RequestMapping(name = "/create", produces = "application/json") // старая версия, оставил чтобы не
     @PostMapping("/create")
     public OperationResult create(@RequestParam String username, @RequestParam String email, @RequestParam String password)
     {
@@ -37,5 +41,47 @@ public class UserController {
             return new ORReject();
         else
             return new AuthUserResult(savedUser.getAccessToken());
+    }
+
+    @GetMapping("/loaded_video")
+    public Collection<Video> getLoadedVideo(@RequestParam(required = false) String username,
+                                            Authentication authentication)
+    {
+        if(username != null)
+        {
+            Optional<User> optionalUser = userRepository.findByUsername(username);
+            if(optionalUser.isEmpty()) return null;
+            else return optionalUser.get().getLoadedVideo();
+        }
+        else if(authentication != null)
+        {
+            User user = (User) authentication.getPrincipal();
+            return user.getLoadedVideo();
+        }
+        else return null;
+    }
+
+    @GetMapping("/favorite_video")
+    public Collection<Video> getFavoriteVideoNonAuth(@RequestParam String username)
+    {
+        if(username != null)
+        {
+            Optional<User> optionalUser = userRepository.findByUsername(username);
+            if(optionalUser.isEmpty()) return null;
+            else return optionalUser.get().getFavoriteVideo();
+        }
+        else return null;
+    }
+
+    @GetMapping("/favorite_video")
+    public Collection<Video> getFavoriteVideoAuth(Authentication authentication)
+    {
+        return ((User) authentication.getPrincipal()).getFavoriteVideo();
+    }
+
+    @GetMapping("/playlists")
+    public Collection<Playlist> getCreatedPlaylists(Authentication authentication)
+    {
+        return ((User)authentication.getPrincipal()).getCreatedPlaylists();
     }
 }

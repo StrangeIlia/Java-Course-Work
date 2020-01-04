@@ -1,6 +1,7 @@
 package bgty.vt_41.bi.entity.domain;
 
 import bgty.vt_41.bi.entity.domain.keys_classes.VideoUserKey;
+import bgty.vt_41.bi.entity.enums.ERating;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -19,5 +20,5 @@ public class Rating {
     @JoinColumn(name = "videoId", nullable = false)
     private Video video;
     @Column(name = "rating", nullable = false)
-    private Byte rating;
+    private ERating rating;
 }

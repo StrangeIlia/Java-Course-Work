@@ -1,6 +1,7 @@
 package bgty.vt_41.bi.entity.domain;
 
 
+import bgty.vt_41.bi.entity.enums.ERating;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,6 +11,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Data
@@ -50,11 +52,22 @@ public class User implements UserDetails, Serializable {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
-    private Collection<Rating> favoriteVideos;
+    private Collection<Rating> ratings;
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<Playlist> createdPlaylists;
+
+    @JsonIgnore
+    public Collection<Video> getFavoriteVideo()
+    {
+        Collection<Video> videos = new ArrayList<>();
+        ratings.forEach(x -> {
+            if(x.getRating() == ERating.LIKE)
+                videos.add(x.getVideo());
+        });
+        return videos;
+    }
 
     public User(){ super(); }
 
