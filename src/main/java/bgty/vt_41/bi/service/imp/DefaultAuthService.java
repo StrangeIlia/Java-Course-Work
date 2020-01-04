@@ -31,6 +31,14 @@ public class DefaultAuthService implements AuthService {
     }
 
     @Override
+    public boolean logout(User user) {
+        if(user == null) return false;
+        String token = UUID.randomUUID().toString();
+        user.setAccessToken(token);
+        return userRepository.save(user) != null;
+    }
+
+    @Override
     public Optional<User> findByToken(String token) {
         return userRepository.findByAccessToken(token);
     }

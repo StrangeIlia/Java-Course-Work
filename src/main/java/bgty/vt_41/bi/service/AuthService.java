@@ -6,5 +6,6 @@ import java.util.Optional;
 
 public interface AuthService {
     String login(String username, String password);
+    boolean logout(User user);
     Optional<User> findByToken(String token);
 }

@@ -62,7 +62,8 @@ public class UserController {
     }
 
     @GetMapping("/favorite_video")
-    public Collection<Video> getFavoriteVideoNonAuth(@RequestParam String username)
+    public Collection<Video> getFavoriteVideoNonAuth(@RequestParam String username,
+                                                     Authentication authentication)
     {
         if(username != null)
         {
@@ -70,13 +71,9 @@ public class UserController {
             if(optionalUser.isEmpty()) return null;
             else return optionalUser.get().getFavoriteVideo();
         }
+        else if(authentication != null)
+            return ((User) authentication.getPrincipal()).getFavoriteVideo();
         else return null;
-    }
-
-    @GetMapping("/favorite_video")
-    public Collection<Video> getFavoriteVideoAuth(Authentication authentication)
-    {
-        return ((User) authentication.getPrincipal()).getFavoriteVideo();
     }
 
     @GetMapping("/playlists")
