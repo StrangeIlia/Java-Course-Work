@@ -6,10 +6,10 @@ import bgty.bt_41.bi.entity.dto.ORReject;
 import bgty.bt_41.bi.entity.dto.OperationResult;
 import bgty.bt_41.bi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Optional;
 
 @RestController
@@ -18,8 +18,8 @@ public class UserController {
     @Autowired
     UserRepository userRepository;
 
-    //@RequestMapping(name = "/create", produces = "application/json")
-    @RequestMapping("/create")
+    //@RequestMapping(name = "/create", produces = "application/json") // старая версия, оставил чтобы не
+    @PostMapping("/create")
     public OperationResult create(@RequestParam String username, @RequestParam String email, @RequestParam String password)
     {
         Optional<User> user = userRepository.findByUsername(username);
@@ -40,7 +40,4 @@ public class UserController {
         else
             return new AuthUserResult(savedUser.getAccessToken());
     }
-
-
-
 }

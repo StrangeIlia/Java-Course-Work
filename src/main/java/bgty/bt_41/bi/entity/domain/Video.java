@@ -1,6 +1,8 @@
 package bgty.bt_41.bi.entity.domain;
 
+import bgty.bt_41.bi.entity.json_serializer.UserSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -31,6 +33,7 @@ public class Video implements Serializable {
 
     @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "author", nullable = false)
+    @JsonSerialize(using = UserSerializer.class) // чтобы было "author" : "<name>" вместо "author" : { "username" : "<name>" }
     private User author;
 
     @OneToMany(mappedBy = "video", fetch = FetchType.LAZY)

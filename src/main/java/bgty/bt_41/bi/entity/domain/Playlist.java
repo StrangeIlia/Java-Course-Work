@@ -1,6 +1,8 @@
 package bgty.bt_41.bi.entity.domain;
 
+import bgty.bt_41.bi.entity.json_serializer.UserSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -24,6 +26,7 @@ public class Playlist implements Serializable {
 
     @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "author", nullable = false)
+    @JsonSerialize(using = UserSerializer.class)
     private User author;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
