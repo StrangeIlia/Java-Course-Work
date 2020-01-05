@@ -53,6 +53,15 @@ public class VideoController {
         savedVideo.setPreview(savePreview(sendVideo.getPreview()));
         savedVideo.setCreatedAt(new java.sql.Timestamp(date.getTime()));
         savedVideo.setUpdatedAt(new java.sql.Timestamp(date.getTime()));
+        try {
+            if(videoRepository.save(savedVideo) != null)
+                return new ResponseEntity<>(new ORSuccess(), HttpStatus.OK);
+            else
+                return new ResponseEntity<>(new ORReject("Не удалось сохранить видео"), HttpStatus.OK);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
         if(videoRepository.save(savedVideo) != null)
             return new ResponseEntity<>(new ORSuccess(), HttpStatus.OK);
         else

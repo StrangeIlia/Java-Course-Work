@@ -18,7 +18,7 @@ public class FileHelper {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         String path = basePath + "/" + dateFormat.format(date);
         String newFileName = Integer.toString((date.toString() + file.getName()).hashCode()) + "." + extension;
-        File savedFile = new File(path + "/" + newFileName);
+        File savedFile = new File(path);
         savedFile.mkdirs();
         savedFile = new File(path + "/" + newFileName);
         try {
@@ -27,7 +27,8 @@ public class FileHelper {
             e.printStackTrace();
         }
         try {
-            file.transferTo(savedFile);
+            FileCopyUtils.copy(file.getInputStream(), new FileOutputStream(savedFile));
+            //file.transferTo(savedFile); отказывается работать (ссылается на неизвестный путь)
         } catch (IOException e) {
             e.printStackTrace();
             return "";
