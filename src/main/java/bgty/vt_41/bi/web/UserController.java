@@ -6,13 +6,16 @@ import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.dto.AuthUserResult;
 import bgty.vt_41.bi.entity.dto.ORReject;
+import bgty.vt_41.bi.entity.dto.ORSuccess;
 import bgty.vt_41.bi.entity.dto.OperationResult;
 import bgty.vt_41.bi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Optional;
 
 @RestController
@@ -41,6 +44,60 @@ public class UserController {
             return new ORReject();
         else
             return new AuthUserResult(savedUser.getAccessToken());
+    }
+
+    @PutMapping("/update")
+    public OperationResult update(@RequestParam String oldPassword,
+                                  @RequestParam(required = false) String username,
+                                  @RequestParam(required = false) String email,
+                                  @RequestParam(required = false) String newPassword,
+                                  Authentication authentication)
+    {
+        User user = (User) authentication.getPrincipal();
+        if(user.checkPassword(oldPassword))
+            return new ORReject("Неверный пароль");
+
+        boolean isUpdate = false;
+        if(username != null)
+        {
+            if(!user.getUsername().equals(username))
+            {
+                user.setUsername(username);
+                isUpdate = true;
+            }
+        }
+        if(email != null)
+        {
+            if(!user.getEmail().equals(email))
+            {
+                user.setEmail(email);
+                isUpdate = true;
+            }
+        }
+        if(newPassword != null)
+        {
+            if(!user.getPassword().equals(newPassword))
+            {
+                user.setPassword(newPassword);
+                isUpdate = true;
+            }
+        }
+        if(isUpdate)
+        {
+            Date date = new Date();
+            user.setUpdatedAt(new Timestamp(date.getTime()));
+            user = userRepository.save(user);
+            if(user == null)
+                new ORReject("Ошибка при сохранении изменений");
+        }
+        return new ORSuccess();
+    }
+
+    @DeleteMapping("/delete")
+    public void deleteUser(Authentication authentication)
+    {
+        User user = (User) authentication.getPrincipal();
+        userRepository.delete(user);
     }
 
     @GetMapping("/loaded_video")

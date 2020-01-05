@@ -3,14 +3,17 @@ package bgty.vt_41.bi.entity.domain;
 
 import bgty.vt_41.bi.entity.enums.ERating;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -32,13 +35,14 @@ public class User implements UserDetails, Serializable {
     private String email;
     @Column(nullable = false)
     @JsonIgnore
+    @Setter(AccessLevel.NONE)
     private String password;
     @Column(nullable = false)
     @JsonIgnore
-    private Date createdAt;
+    private Timestamp createdAt;
     @Column(nullable = false)
     @JsonIgnore
-    private Date updatedAt;
+    private Timestamp updatedAt;
     @Column(nullable = false)
     @JsonIgnore
     private String authKey;
@@ -108,5 +112,17 @@ public class User implements UserDetails, Serializable {
     @JsonIgnore
     public boolean isEnabled() {
         return true;
+    }
+
+    @JsonIgnore
+    public boolean checkPassword(String password)
+    {
+        return  this.password == password;
+    }
+
+    @JsonIgnore
+    public void setPassword(String password)
+    {
+        this.password = password;
     }
 }

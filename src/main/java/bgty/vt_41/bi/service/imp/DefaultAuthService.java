@@ -18,15 +18,17 @@ public class DefaultAuthService implements AuthService {
 
     @Override
     public String login(String username, String password) {
-        Optional<User> optionalUser = userRepository.login(username,password);
+        Optional<User> optionalUser = userRepository.findByUsername(username);
         if(optionalUser.isPresent()){
-            String token = UUID.randomUUID().toString();
             User user = optionalUser.get();
-            user.setAccessToken(token);
-            userRepository.save(user);
-            return token;
+            if(user.checkPassword(password))
+            {
+                String token = UUID.randomUUID().toString();
+                user.setAccessToken(token);
+                userRepository.save(user);
+                return token;
+            }
         }
-
         return StringUtils.EMPTY;
     }
 

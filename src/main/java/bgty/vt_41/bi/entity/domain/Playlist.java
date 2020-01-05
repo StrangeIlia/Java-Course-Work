@@ -7,7 +7,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.Collection;
 
 @Data
@@ -20,9 +20,9 @@ public class Playlist implements Serializable {
     @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "createdAt",nullable = false)
-    private Date createdAt;
+    private Timestamp createdAt;
     @Column(name = "updateAt", nullable = false)
-    private Date updatedAt;
+    private Timestamp updatedAt;
 
     @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "author", nullable = false)

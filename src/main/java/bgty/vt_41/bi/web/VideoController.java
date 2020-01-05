@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Optional;
 
@@ -52,8 +53,8 @@ public class VideoController {
         savedVideo.setName(name);
         savedVideo.setPath(saveVideo(video));
         savedVideo.setPreview(savePreview(preview));
-        savedVideo.setCreatedAt(new java.sql.Date(date.getTime()));
-        savedVideo.setUpdatedAt(new java.sql.Date(date.getTime()));
+        savedVideo.setCreatedAt(new java.sql.Timestamp(date.getTime()));
+        savedVideo.setUpdatedAt(new java.sql.Timestamp(date.getTime()));
         if(videoRepository.save(savedVideo) != null)
             return new ORSuccess();
         else
@@ -106,6 +107,8 @@ public class VideoController {
         }
         if(isUpdated)
         {
+            Date date = new Date();
+            savedVideo.setUpdatedAt(new Timestamp(date.getTime()));
             savedVideo = videoRepository.save(savedVideo);
             if(savedVideo == null)
                 return new ORReject("Ошибка при сохранении видео");

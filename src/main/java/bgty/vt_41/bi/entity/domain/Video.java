@@ -4,15 +4,10 @@ import bgty.vt_41.bi.entity.json_serializer.UserSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
-import org.apache.commons.io.FilenameUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
 import java.util.Collection;
 
 @Data
@@ -33,9 +28,9 @@ public class Video implements Serializable {
     @Column(name = "numberOfViews", columnDefinition = "int default 0")
     private Integer numberOfViews;
     @Column(name = "createdAt", nullable = false)
-    private Date createdAt;
+    private Timestamp createdAt;
     @Column(name = "updatedAt", nullable = false)
-    private Date updatedAt;
+    private Timestamp updatedAt;
 
     @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "author", nullable = false)
