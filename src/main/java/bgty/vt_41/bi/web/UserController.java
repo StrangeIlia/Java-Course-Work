@@ -10,6 +10,8 @@ import bgty.vt_41.bi.entity.dto.ORSuccess;
 import bgty.vt_41.bi.entity.dto.OperationResult;
 import bgty.vt_41.bi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,15 +27,15 @@ public class UserController {
     UserRepository userRepository;
 
     @PostMapping("/create")
-    public OperationResult create(@RequestParam String username, @RequestParam String email, @RequestParam String password)
+    public ResponseEntity<OperationResult> create(@RequestParam String username, @RequestParam String email, @RequestParam String password)
     {
         Optional<User> user = userRepository.findByUsername(username);
         if(user.isPresent()){
-            return new ORReject("Пользователь с таким логином уже существует");
+            return new ResponseEntity<>(new ORReject("Пользователь с таким логином уже существует"), HttpStatus.OK);
         }
         user = userRepository.findByEmail(username);
         if(user.isPresent()){
-            return new ORReject("Данная электронная почта уже привязана к другому аккаунту");
+            return new ResponseEntity<>(new ORReject("Данная электронная почта уже привязана к другому аккаунту"), HttpStatus.OK);
         }
         User newUser = new User();
         newUser.setUsername(username);
@@ -41,13 +43,13 @@ public class UserController {
         newUser.setPassword(password);
         User savedUser = userRepository.save(newUser);
         if(savedUser == null)
-            return new ORReject();
+            return new ResponseEntity<>(new ORReject(), HttpStatus.OK);
         else
-            return new AuthUserResult(savedUser.getAccessToken());
+            return new ResponseEntity<>(new AuthUserResult(savedUser.getAccessToken()), HttpStatus.OK);
     }
 
     @PutMapping("/update")
-    public OperationResult update(@RequestParam String oldPassword,
+    public ResponseEntity<OperationResult> update(@RequestParam String oldPassword,
                                   @RequestParam(required = false) String username,
                                   @RequestParam(required = false) String email,
                                   @RequestParam(required = false) String newPassword,
@@ -55,7 +57,7 @@ public class UserController {
     {
         User user = (User) authentication.getPrincipal();
         if(user.checkPassword(oldPassword))
-            return new ORReject("Неверный пароль");
+            return new ResponseEntity<>(new ORReject("Неверный пароль"), HttpStatus.OK);
 
         boolean isUpdate = false;
         if(username != null)
@@ -88,9 +90,9 @@ public class UserController {
             user.setUpdatedAt(new Timestamp(date.getTime()));
             user = userRepository.save(user);
             if(user == null)
-                new ORReject("Ошибка при сохранении изменений");
+                return new ResponseEntity<>(new ORReject("Ошибка при сохранении изменений"), HttpStatus.OK);
         }
-        return new ORSuccess();
+        return new ResponseEntity<>(new ORSuccess(), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")

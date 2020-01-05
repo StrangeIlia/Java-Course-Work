@@ -23,8 +23,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
-            new AntPathRequestMatcher("/api/users/**"),
-            new AntPathRequestMatcher("/api/site/get_username")
+            new AntPathRequestMatcher("/api/user/**")
     );
 
     AuthenticationProvider provider;
@@ -41,8 +40,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(final WebSecurity webSecurity) {
-        webSecurity.ignoring().antMatchers("/token/**");
-        webSecurity.ignoring().antMatchers("/api/videos/**");
+        //webSecurity.ignoring().antMatchers("/token/**");
+        //webSecurity.ignoring().antMatchers("/api/videos/index");
+        //webSecurity.ignoring().antMatchers("/api/videos/view");
+        //webSecurity.ignoring().antMatchers("/api/site/login");
     }
 
     @Override

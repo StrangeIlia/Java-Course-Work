@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -43,11 +44,10 @@ public class User implements UserDetails, Serializable {
     @Column(nullable = false)
     @JsonIgnore
     private Timestamp updatedAt;
-    @Column(nullable = false)
     @JsonIgnore
     private String authKey;
-    @Column(nullable = false)
     @JsonIgnore
+    @Column(length = 36)
     private String accessToken;
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
@@ -117,7 +117,7 @@ public class User implements UserDetails, Serializable {
     @JsonIgnore
     public boolean checkPassword(String password)
     {
-        return  this.password == password;
+        return this.password.equals(password);
     }
 
     @JsonIgnore

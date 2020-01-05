@@ -9,6 +9,8 @@ import bgty.vt_41.bi.entity.dto.UpdateVideoResult;
 import bgty.vt_41.bi.repository.VideoRepository;
 import bgty.vt_41.bi.util.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,10 +43,10 @@ public class VideoController {
     }
 
     @PostMapping("/create")
-    public OperationResult createVideo(@RequestParam String name,
-                                       @RequestParam MultipartFile video,
-                                       @RequestParam MultipartFile preview,
-                                       Authentication authentication)
+    public ResponseEntity<OperationResult> createVideo(@RequestParam String name,
+                                                      @RequestParam MultipartFile video,
+                                                      @RequestParam MultipartFile preview,
+                                                      Authentication authentication)
     {
         Date date = new Date();
         Video savedVideo = new Video();
@@ -56,13 +58,13 @@ public class VideoController {
         savedVideo.setCreatedAt(new java.sql.Timestamp(date.getTime()));
         savedVideo.setUpdatedAt(new java.sql.Timestamp(date.getTime()));
         if(videoRepository.save(savedVideo) != null)
-            return new ORSuccess();
+            return new ResponseEntity<>(new ORSuccess(), HttpStatus.OK);
         else
-            return new ORReject("Не удалось сохранить видео");
+            return new ResponseEntity<>(new ORReject("Не удалось сохранить видео"), HttpStatus.OK);
     }
 
     @PutMapping("/update")
-    public OperationResult updateVideo(@RequestParam("id") Integer id,
+    public ResponseEntity<OperationResult> updateVideo(@RequestParam("id") Integer id,
                                        @RequestParam(required = false) String name,
                                        @RequestParam(required = false) String description,
                                        @RequestParam(required = false) MultipartFile video,
@@ -71,10 +73,10 @@ public class VideoController {
     {
         Optional<Video> updatedVideo = videoRepository.findById(id);
         if(updatedVideo.isEmpty())
-            return new ORReject("Нет видео с таким id");
+            return new ResponseEntity<>(new ORReject("Нет видео с таким id"), HttpStatus.OK);
         Video savedVideo = updatedVideo.get();
         if(!savedVideo.getAuthor().equals(authentication.getPrincipal()))
-            return new ORReject("У вас нет прав на обновление этого видео");
+            return new ResponseEntity<>(new ORReject("У вас нет прав на обновление этого видео"), HttpStatus.OK);
         boolean isUpdated = false;
         if(name != null) {
             if(!savedVideo.getName().equals(name)){
@@ -93,7 +95,7 @@ public class VideoController {
             try {
                 video.transferTo(savedFile);
             } catch (IOException e) {
-                return new ORReject("Ошибка при загрузке видео");
+                return new ResponseEntity<>(new ORReject("Ошибка при загрузке видео"), HttpStatus.OK);
             }
         }
         if(preview != null)
@@ -102,7 +104,7 @@ public class VideoController {
             try {
                 preview.transferTo(savedFile);
             } catch (IOException e) {
-                return new ORReject("Ошибка при загрузке видео");
+                return new ResponseEntity<>(new ORReject("Ошибка при загрузке превью"), HttpStatus.OK);
             }
         }
         if(isUpdated)
@@ -111,9 +113,9 @@ public class VideoController {
             savedVideo.setUpdatedAt(new Timestamp(date.getTime()));
             savedVideo = videoRepository.save(savedVideo);
             if(savedVideo == null)
-                return new ORReject("Ошибка при сохранении видео");
+                return new ResponseEntity<>(new ORReject("Ошибка при сохранении видео"), HttpStatus.OK);
         }
-        return new UpdateVideoResult(savedVideo);
+        return new ResponseEntity<>(new UpdateVideoResult(savedVideo), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")
