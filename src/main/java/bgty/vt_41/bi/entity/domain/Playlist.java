@@ -1,6 +1,6 @@
 package bgty.vt_41.bi.entity.domain;
 
-import bgty.vt_41.bi.entity.json_serializer.UserSerializer;
+import bgty.vt_41.bi.util.json_serializer.UserSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;

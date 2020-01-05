@@ -1,4 +1,4 @@
-package bgty.vt_41.bi.entity.json_serializer;
+package bgty.vt_41.bi.util.json_serializer;
 
 import bgty.vt_41.bi.entity.enums.EStatus;
 import com.fasterxml.jackson.core.JsonGenerator;

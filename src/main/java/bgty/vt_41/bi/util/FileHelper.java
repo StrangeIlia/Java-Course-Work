@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 public class FileHelper {
     public static String saveFile(MultipartFile file, String basePath)
@@ -17,22 +18,17 @@ public class FileHelper {
         Date date = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         String path = basePath + "/" + dateFormat.format(date);
-        String newFileName = Integer.toString((date.toString() + file.getName()).hashCode()) + "." + extension;
+        String newFileName = UUID.randomUUID().toString() + "." + extension;
         File savedFile = new File(path);
         savedFile.mkdirs();
         savedFile = new File(path + "/" + newFileName);
         try {
-            savedFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            FileCopyUtils.copy(file.getInputStream(), new FileOutputStream(savedFile));
-            //file.transferTo(savedFile); отказывается работать (ссылается на неизвестный путь)
+            //FileCopyUtils.copy(file.getInputStream(), new FileOutputStream(savedFile));
+            file.transferTo(savedFile); //отказывается работать (ссылается на неизвестный путь)
         } catch (IOException e) {
             e.printStackTrace();
             return "";
         }
-        return newFileName;
+        return path + "/" + newFileName;
     }
 }
