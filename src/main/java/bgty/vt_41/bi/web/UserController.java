@@ -27,7 +27,7 @@ public class UserController {
     UserRepository userRepository;
 
     @PostMapping("/create")
-    public ResponseEntity<OperationResult> create(@RequestParam String username, @RequestParam String email, @RequestParam String password)
+    public ResponseEntity<OperationResult> create(@RequestPart String username, @RequestPart String email, @RequestPart String password)
     {
         Optional<User> user = userRepository.findByUsername(username);
         if(user.isPresent()){
@@ -49,10 +49,10 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<OperationResult> update(@RequestParam String oldPassword,
-                                  @RequestParam(required = false) String username,
-                                  @RequestParam(required = false) String email,
-                                  @RequestParam(required = false) String newPassword,
+    public ResponseEntity<OperationResult> update(@RequestPart String oldPassword,
+                                  @RequestPart(required = false) String username,
+                                  @RequestPart(required = false) String email,
+                                  @RequestPart(required = false) String newPassword,
                                   Authentication authentication)
     {
         User user = (User) authentication.getPrincipal();

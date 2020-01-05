@@ -43,9 +43,9 @@ public class VideoController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<OperationResult> createVideo(@RequestParam String name,
-                                                      @RequestParam MultipartFile video,
-                                                      @RequestParam MultipartFile preview,
+    public ResponseEntity<OperationResult> createVideo(@RequestPart String name,
+                                                      @RequestPart MultipartFile video,
+                                                      @RequestPart MultipartFile preview,
                                                       Authentication authentication)
     {
         Date date = new Date();
@@ -64,11 +64,11 @@ public class VideoController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<OperationResult> updateVideo(@RequestParam("id") Integer id,
-                                       @RequestParam(required = false) String name,
-                                       @RequestParam(required = false) String description,
-                                       @RequestParam(required = false) MultipartFile video,
-                                       @RequestParam(required = false) MultipartFile preview,
+    public ResponseEntity<OperationResult> updateVideo(@RequestParam Integer id,
+                                       @RequestPart(required = false) String name,
+                                       @RequestPart(required = false) String description,
+                                       @RequestPart(required = false) MultipartFile video,
+                                       @RequestPart(required = false) MultipartFile preview,
                                        Authentication authentication)
     {
         Optional<Video> updatedVideo = videoRepository.findById(id);

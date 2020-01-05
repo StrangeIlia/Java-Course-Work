@@ -6,7 +6,9 @@ import bgty.vt_41.bi.entity.dto.ORReject;
 import bgty.vt_41.bi.entity.dto.ORSuccess;
 import bgty.vt_41.bi.entity.dto.OperationResult;
 import bgty.vt_41.bi.service.AuthService;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,14 +21,14 @@ public class SiteController {
     @Autowired
     AuthService authService;
 
-    @PostMapping(value = "/login")
-    public ResponseEntity<OperationResult> login(@RequestParam String username, @RequestParam String password)
+    @PostMapping(value = "/login", consumes = "multipart/form-data")
+    public OperationResult login(@RequestPart String username, @RequestPart String password)
     {
         String token = authService.login(username, password);
         if(!token.isEmpty())
-            return new ResponseEntity<>(new AuthUserResult(token), HttpStatus.OK);
+            return new AuthUserResult(token);
         else
-            return new ResponseEntity<>(new ORReject("Неверный логин или пароль"), HttpStatus.OK);
+            return new ORReject("Неверный логин или пароль");
     }
 
     @GetMapping("/get_username")
