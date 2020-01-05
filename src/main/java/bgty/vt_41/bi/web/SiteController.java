@@ -16,23 +16,23 @@ public class SiteController {
     @Autowired
     AuthService authService;
 
-    public ResponseEntity<OperationResult> login(LoginForm loginForm)
+    public OperationResult login(LoginForm loginForm)
     {
         String token = authService.login(loginForm.getUsername(), loginForm.getPassword());
         if(!token.isEmpty())
-            return ResponseEntity.ok(new AuthUserResult(token));
+            return new AuthUserResult(token);
         else
-            return ResponseEntity.ok(new ORReject("Неверный логин или пароль"));
+            return new ORReject("Неверный логин или пароль");
     }
 
     @PostMapping(value = "/login", consumes = "application/json")
-    public ResponseEntity<OperationResult> loginV1(@RequestBody LoginForm loginForm)
+    public OperationResult loginV1(@RequestBody LoginForm loginForm)
     {
         return  login(loginForm);
     }
 
     @PostMapping(value = "/login", consumes = "multipart/form-data")
-    public ResponseEntity<OperationResult> loginV2(@ModelAttribute LoginForm loginForm)
+    public OperationResult loginV2(@ModelAttribute LoginForm loginForm)
     {
         return  login(loginForm);
     }
