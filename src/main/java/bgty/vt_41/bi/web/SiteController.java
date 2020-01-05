@@ -16,25 +16,14 @@ public class SiteController {
     @Autowired
     AuthService authService;
 
-    public OperationResult login(LoginForm loginForm)
+    @PostMapping(value = "/login", consumes = "application/json")
+    public OperationResult loginV1(@RequestBody LoginForm loginForm)
     {
         String token = authService.login(loginForm.getUsername(), loginForm.getPassword());
         if(!token.isEmpty())
             return new AuthUserResult(token);
         else
             return new ORReject("Неверный логин или пароль");
-    }
-
-    @PostMapping(value = "/login", consumes = "application/json")
-    public OperationResult loginV1(@RequestBody LoginForm loginForm)
-    {
-        return  login(loginForm);
-    }
-
-    @PostMapping(value = "/login", consumes = "multipart/form-data")
-    public OperationResult loginV2(@ModelAttribute LoginForm loginForm)
-    {
-        return  login(loginForm);
     }
 
     @GetMapping("/get_username")
@@ -45,11 +34,11 @@ public class SiteController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<OperationResult> logout(Authentication authentication)
+    public OperationResult logout(Authentication authentication)
     {
         if(authService.logout((User)authentication.getPrincipal()))
-            return new ResponseEntity<>(new ORSuccess(), HttpStatus.OK);
+            return new ORSuccess();
         else
-            return new ResponseEntity<>(new ORReject(), HttpStatus.OK);
+            return new ORReject();
     }
 }
