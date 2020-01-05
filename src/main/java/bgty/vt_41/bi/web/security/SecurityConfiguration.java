@@ -29,9 +29,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     );
 
     private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
-            new AntPathRequestMatcher("/api/site/logout"),
-            new AntPathRequestMatcher("/api/site/get_username"),
-            new AntPathRequestMatcher("/api/users/**")
+            new AntPathRequestMatcher("/api/user/**")
     );
 
     AuthenticationProvider provider;
@@ -50,6 +48,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(final WebSecurity webSecurity) {
         //webSecurity.ignoring().antMatchers("/token/**");
         webSecurity.ignoring().antMatchers("/api/site/login");
+        webSecurity.ignoring().antMatchers("/api/site/get_username");
         //webSecurity.ignoring().antMatchers("/api/videos/view");
     }
 

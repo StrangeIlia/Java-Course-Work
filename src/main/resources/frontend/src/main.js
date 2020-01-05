@@ -15,7 +15,6 @@ export let MainVue = new Vue({
     return {
       username : ''
     }
-
   },
 
   render: h => h(App),

@@ -26,6 +26,7 @@ public class SiteController {
             return new ORReject("Неверный логин или пароль");
     }
 
+
     @GetMapping("/get_username")
     public String getUsername(Authentication authentication)
     {
