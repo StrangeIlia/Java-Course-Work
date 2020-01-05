@@ -13,7 +13,7 @@ export let MainVue = new Vue({
   router,
   data() {
     return {
-      username : '',
+      username : ''
     }
 
   },

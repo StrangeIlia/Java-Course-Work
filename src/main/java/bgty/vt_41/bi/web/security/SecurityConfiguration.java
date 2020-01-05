@@ -21,9 +21,17 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+    private static final RequestMatcher PERMIT_URLS = new OrRequestMatcher(
+            new AntPathRequestMatcher("/api/site/login"),
+            new AntPathRequestMatcher("/api/videos"),
+            new AntPathRequestMatcher("/api/videos/index"),
+            new AntPathRequestMatcher("/api/videos/view")
+    );
 
     private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
-            new AntPathRequestMatcher("/api/user/**")
+            new AntPathRequestMatcher("/api/site/logout"),
+            new AntPathRequestMatcher("/api/site/get_username"),
+            new AntPathRequestMatcher("/api/users/**")
     );
 
     AuthenticationProvider provider;
@@ -41,9 +49,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(final WebSecurity webSecurity) {
         //webSecurity.ignoring().antMatchers("/token/**");
-        //webSecurity.ignoring().antMatchers("/api/videos/index");
+        webSecurity.ignoring().antMatchers("/api/site/login");
         //webSecurity.ignoring().antMatchers("/api/videos/view");
-        //webSecurity.ignoring().antMatchers("/api/site/login");
     }
 
     @Override
@@ -56,7 +63,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authenticationProvider(provider)
                 .addFilterBefore(authenticationFilter(), AnonymousAuthenticationFilter.class)
                 .authorizeRequests()
-                .requestMatchers(PROTECTED_URLS)
+                .requestMatchers(PERMIT_URLS)
+                .permitAll()
+                .anyRequest()
                 .authenticated()
                 .and()
                 .csrf().disable()

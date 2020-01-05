@@ -1,14 +1,9 @@
 package bgty.vt_41.bi.web;
 
 import bgty.vt_41.bi.entity.domain.User;
-import bgty.vt_41.bi.entity.dto.AuthUserResult;
-import bgty.vt_41.bi.entity.dto.ORReject;
-import bgty.vt_41.bi.entity.dto.ORSuccess;
-import bgty.vt_41.bi.entity.dto.OperationResult;
+import bgty.vt_41.bi.entity.dto.*;
 import bgty.vt_41.bi.service.AuthService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,14 +16,25 @@ public class SiteController {
     @Autowired
     AuthService authService;
 
-    @PostMapping(value = "/login", consumes = "multipart/form-data")
-    public OperationResult login(@RequestPart String username, @RequestPart String password)
+    public ResponseEntity<OperationResult> login(LoginForm loginForm)
     {
-        String token = authService.login(username, password);
+        String token = authService.login(loginForm.getUsername(), loginForm.getPassword());
         if(!token.isEmpty())
-            return new AuthUserResult(token);
+            return ResponseEntity.ok(new AuthUserResult(token));
         else
-            return new ORReject("Неверный логин или пароль");
+            return ResponseEntity.ok(new ORReject("Неверный логин или пароль"));
+    }
+
+    @PostMapping(value = "/login", consumes = "application/json")
+    public ResponseEntity<OperationResult> loginV1(@RequestBody LoginForm loginForm)
+    {
+        return  login(loginForm);
+    }
+
+    @PostMapping(value = "/login", consumes = "multipart/form-data")
+    public ResponseEntity<OperationResult> loginV2(@ModelAttribute LoginForm loginForm)
+    {
+        return  login(loginForm);
     }
 
     @GetMapping("/get_username")
