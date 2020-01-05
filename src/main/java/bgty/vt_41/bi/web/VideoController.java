@@ -60,7 +60,7 @@ public class VideoController {
             return new ORReject("Не удалось сохранить видео");
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public OperationResult updateVideo(@RequestParam("id") Integer id,
                                        @RequestParam(required = false) String name,
                                        @RequestParam(required = false) String description,
@@ -113,7 +113,7 @@ public class VideoController {
         return new UpdateVideoResult(savedVideo);
     }
 
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     public void deleteVideo(@RequestParam("id") Integer id,
                             Authentication authentication)
     {
