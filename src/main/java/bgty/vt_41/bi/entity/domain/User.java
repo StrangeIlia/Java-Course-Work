@@ -23,7 +23,6 @@ import java.util.Collection;
 public class User implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false)
     @JsonIgnore
     private Integer id;
     @Column(nullable = false)

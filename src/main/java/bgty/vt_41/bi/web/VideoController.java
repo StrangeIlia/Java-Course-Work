@@ -3,6 +3,7 @@ package bgty.vt_41.bi.web;
 import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.dto.*;
+import bgty.vt_41.bi.repository.UserRepository;
 import bgty.vt_41.bi.repository.VideoRepository;
 import bgty.vt_41.bi.util.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class VideoController {
     @Autowired
     VideoRepository videoRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     private String basePathForVideo = "uploads/videos";
     private String basePathForPreview = "uploads/previews";
 
@@ -43,10 +47,14 @@ public class VideoController {
     public ResponseEntity<OperationResult> createVideo(@ModelAttribute VideoForm sendVideo,
                                                        Authentication authentication)
     {
+
         Date date = new Date();
         Video savedVideo = new Video();
-        User user = (User) authentication.getCredentials();
-        savedVideo.setAuthor(user);
+        User user = (User) authentication.getPrincipal();
+        //savedVideo.setAuthor(user); //НИКОГДА НЕ ДЕЛАЕТЕ ТАК
+        userRepository.findById(user.getId()).ifPresent(savedVideo::setAuthor); //Правильно так
+        /*Optional<User> optionalUser = Optional.of(user);
+        optionalUser.ifPresent(savedVideo::setAuthor); // Попытка схитрить не удалась ХД*/
         savedVideo.setName(sendVideo.getName());
         savedVideo.setDescription(sendVideo.getDescription());
         savedVideo.setPath(saveVideo(sendVideo.getVideo()));
@@ -55,9 +63,9 @@ public class VideoController {
         savedVideo.setUpdatedAt(new java.sql.Timestamp(date.getTime()));
         try {
             if(videoRepository.save(savedVideo) != null)
-                return new ResponseEntity<>(new ORSuccess(), HttpStatus.OK);
+                return ResponseEntity.ok(new ORSuccess());
             else
-                return new ResponseEntity<>(new ORReject("Не удалось сохранить видео"), HttpStatus.OK);
+                return ResponseEntity.ok(new ORReject("Не удалось сохранить видео"));
         }
         catch (Exception e){
             e.printStackTrace();
@@ -128,9 +136,12 @@ public class VideoController {
     public void deleteVideo(@RequestParam("id") Integer id,
                             Authentication authentication)
     {
-        Optional<Video> video = videoRepository.findById(id);
-        if(video.isPresent() && video.get().getAuthor().equals(authentication.getPrincipal()))
-            videoRepository.delete(video.get());
+        Optional<Video> optionalVideo = videoRepository.findById(id);
+        if(optionalVideo.isPresent() && optionalVideo.get().getAuthor().equals(authentication.getPrincipal()))
+        {
+            Video video = optionalVideo.get();
+            videoRepository.delete(video);
+        }
     }
 
     private String saveVideo(MultipartFile video) {

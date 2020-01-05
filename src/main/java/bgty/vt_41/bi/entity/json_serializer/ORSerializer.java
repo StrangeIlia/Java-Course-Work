@@ -1,6 +1,5 @@
 package bgty.vt_41.bi.entity.json_serializer;
 
-import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.enums.EStatus;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

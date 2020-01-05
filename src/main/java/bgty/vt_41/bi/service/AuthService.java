@@ -1,6 +1,7 @@
 package bgty.vt_41.bi.service;
 
 import bgty.vt_41.bi.entity.domain.User;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
