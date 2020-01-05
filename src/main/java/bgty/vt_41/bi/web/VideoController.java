@@ -2,10 +2,7 @@ package bgty.vt_41.bi.web;
 
 import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
-import bgty.vt_41.bi.entity.dto.ORReject;
-import bgty.vt_41.bi.entity.dto.ORSuccess;
-import bgty.vt_41.bi.entity.dto.OperationResult;
-import bgty.vt_41.bi.entity.dto.UpdateVideoResult;
+import bgty.vt_41.bi.entity.dto.*;
 import bgty.vt_41.bi.repository.VideoRepository;
 import bgty.vt_41.bi.util.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,19 +39,18 @@ public class VideoController {
         return videoRepository.findById(id);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<OperationResult> createVideo(@RequestPart String name,
-                                                      @RequestPart MultipartFile video,
-                                                      @RequestPart MultipartFile preview,
-                                                      Authentication authentication)
+    @PostMapping(value = "/create", consumes = "multipart/form-data")
+    public ResponseEntity<OperationResult> createVideo(@ModelAttribute VideoForm sendVideo,
+                                                       Authentication authentication)
     {
         Date date = new Date();
         Video savedVideo = new Video();
         User user = (User) authentication.getCredentials();
         savedVideo.setAuthor(user);
-        savedVideo.setName(name);
-        savedVideo.setPath(saveVideo(video));
-        savedVideo.setPreview(savePreview(preview));
+        savedVideo.setName(sendVideo.getName());
+        savedVideo.setDescription(sendVideo.getDescription());
+        savedVideo.setPath(saveVideo(sendVideo.getVideo()));
+        savedVideo.setPreview(savePreview(sendVideo.getPreview()));
         savedVideo.setCreatedAt(new java.sql.Timestamp(date.getTime()));
         savedVideo.setUpdatedAt(new java.sql.Timestamp(date.getTime()));
         if(videoRepository.save(savedVideo) != null)
@@ -63,13 +59,10 @@ public class VideoController {
             return new ResponseEntity<>(new ORReject("Не удалось сохранить видео"), HttpStatus.OK);
     }
 
-    @PutMapping("/update")
+    @PatchMapping("/update")
     public ResponseEntity<OperationResult> updateVideo(@RequestParam Integer id,
-                                       @RequestPart(required = false) String name,
-                                       @RequestPart(required = false) String description,
-                                       @RequestPart(required = false) MultipartFile video,
-                                       @RequestPart(required = false) MultipartFile preview,
-                                       Authentication authentication)
+                                                       @ModelAttribute VideoForm sendVideo,
+                                                       Authentication authentication)
     {
         Optional<Video> updatedVideo = videoRepository.findById(id);
         if(updatedVideo.isEmpty())
@@ -78,31 +71,35 @@ public class VideoController {
         if(!savedVideo.getAuthor().equals(authentication.getPrincipal()))
             return new ResponseEntity<>(new ORReject("У вас нет прав на обновление этого видео"), HttpStatus.OK);
         boolean isUpdated = false;
-        if(name != null) {
-            if(!savedVideo.getName().equals(name)){
-                savedVideo.setName(name);
+        if(sendVideo.getName() != null) {
+            if(!savedVideo.getName().equals(sendVideo.getName())){
+                savedVideo.setName(sendVideo.getName());
                 isUpdated = true;
             }
         }
-        if(!savedVideo.getDescription().equals(description))
+        if(savedVideo.getDescription() != null || sendVideo.getDescription() != null)
         {
-            savedVideo.setName(name);
-            isUpdated = true;
+            if(savedVideo.getDescription() == null || !savedVideo.getDescription().equals(sendVideo.getDescription()))
+            {
+                savedVideo.setName(sendVideo.getDescription());
+                isUpdated = true;
+            }
         }
-        if(video != null)
+
+        if(sendVideo.getVideo() != null)
         {
             File savedFile = new File(basePathForVideo + "/" + savedVideo.getPath());
             try {
-                video.transferTo(savedFile);
+                sendVideo.getVideo().transferTo(savedFile);
             } catch (IOException e) {
                 return new ResponseEntity<>(new ORReject("Ошибка при загрузке видео"), HttpStatus.OK);
             }
         }
-        if(preview != null)
+        if(sendVideo.getPreview() != null)
         {
             File savedFile = new File(basePathForPreview + "/" + savedVideo.getPath());
             try {
-                preview.transferTo(savedFile);
+                sendVideo.getPreview().transferTo(savedFile);
             } catch (IOException e) {
                 return new ResponseEntity<>(new ORReject("Ошибка при загрузке превью"), HttpStatus.OK);
             }
@@ -115,7 +112,7 @@ public class VideoController {
             if(savedVideo == null)
                 return new ResponseEntity<>(new ORReject("Ошибка при сохранении видео"), HttpStatus.OK);
         }
-        return new ResponseEntity<>(new UpdateVideoResult(savedVideo), HttpStatus.OK);
+        return ResponseEntity.ok(new UpdateVideoResult(savedVideo));
     }
 
     @DeleteMapping("/delete")

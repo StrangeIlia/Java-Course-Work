@@ -48,7 +48,7 @@ public class UserController {
             return new ResponseEntity<>(new AuthUserResult(savedUser.getAccessToken()), HttpStatus.OK);
     }
 
-    @PutMapping("/update")
+    @PatchMapping("/update")
     public ResponseEntity<OperationResult> update(@RequestPart String oldPassword,
                                   @RequestPart(required = false) String username,
                                   @RequestPart(required = false) String email,

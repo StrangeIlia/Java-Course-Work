@@ -2,6 +2,7 @@ package bgty.vt_41.bi.web.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -21,15 +22,16 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-    private static final RequestMatcher PERMIT_URLS = new OrRequestMatcher(
-            new AntPathRequestMatcher("/api/site/login"),
-            new AntPathRequestMatcher("/api/videos"),
-            new AntPathRequestMatcher("/api/videos/index"),
-            new AntPathRequestMatcher("/api/videos/view")
-    );
-
     private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
-            new AntPathRequestMatcher("/api/user/**")
+            //Явно указываю методы, ибо без этого OPTIONS запросы не работают
+            new AntPathRequestMatcher("/api/videos/create", "POST"),
+            new AntPathRequestMatcher("/api/videos/update", "PATCH"),
+            new AntPathRequestMatcher("/api/videos/delete", "DELETE"),
+            new AntPathRequestMatcher("/api/users/create", "POST"),
+            new AntPathRequestMatcher("/api/users/update", "PATCH"),
+            new AntPathRequestMatcher("/api/users/delete", "DELETE"),
+            new AntPathRequestMatcher("/api/site/get_username", "GET"),
+            new AntPathRequestMatcher("/api/site/logout", "POST")
     );
 
     AuthenticationProvider provider;
@@ -47,9 +49,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(final WebSecurity webSecurity) {
         //webSecurity.ignoring().antMatchers("/token/**");
-        webSecurity.ignoring().antMatchers("/api/site/login");
-        webSecurity.ignoring().antMatchers("/api/site/get_username");
-        //webSecurity.ignoring().antMatchers("/api/videos/view");
+        webSecurity.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
     }
 
     @Override
@@ -62,10 +62,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authenticationProvider(provider)
                 .addFilterBefore(authenticationFilter(), AnonymousAuthenticationFilter.class)
                 .authorizeRequests()
-                .requestMatchers(PERMIT_URLS)
-                .permitAll()
-                .anyRequest()
-                .authenticated()
+                    .antMatchers(HttpMethod.OPTIONS,"/**").permitAll()//Попытка разрешить на все адреса запрос OPTIONS, но это похоже не работает, поскольку у запрета выше приоритет
+                    .requestMatchers(PROTECTED_URLS)
+                    .authenticated()
                 .and()
                 .csrf().disable()
                 .formLogin().disable()
