@@ -1,8 +1,10 @@
 package bgty.vt_41.bi.util.json_serializer;
 
+import bgty.vt_41.bi.web.FileController;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.net.InterfaceAddress;
@@ -11,6 +13,9 @@ import java.net.SocketException;
 import java.util.Enumeration;
 
 public class PathFilesSerializer extends JsonSerializer<String> {
+    @Value("${server.port}")
+    private Integer port;
+
     private static String address = null;
 
     private void findAddress()
@@ -37,6 +42,6 @@ public class PathFilesSerializer extends JsonSerializer<String> {
     @Override
     public void serialize(String path, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         findAddress();
-        jsonGenerator.writeObject(address + ":50001/files/" + path );
+        jsonGenerator.writeObject("http://" + address + ":" + port + "/" + FileController.filePath + "/" + path );
     }
 }
