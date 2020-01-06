@@ -28,8 +28,8 @@ public class VideoController {
     @Autowired
     UserRepository userRepository;
 
-    private String basePathForVideo = "uploads/videos";
-    private String basePathForPreview = "uploads/previews";
+    public static final String basePathForVideo = "uploads/videos";
+    public static final String basePathForPreview = "uploads/previews";
 
     @GetMapping(value = {"", "/index"})
     public Iterable<Video> getAllVideo()
