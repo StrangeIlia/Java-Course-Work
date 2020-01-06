@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import java.io.IOException;
-import java.net.Inet4Address;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -38,6 +37,6 @@ public class PathFilesSerializer extends JsonSerializer<String> {
     @Override
     public void serialize(String path, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         findAddress();
-        jsonGenerator.writeObject("https://" + address + ":50001/" + path );
+        jsonGenerator.writeObject(address + ":50001/files/" + path );
     }
 }

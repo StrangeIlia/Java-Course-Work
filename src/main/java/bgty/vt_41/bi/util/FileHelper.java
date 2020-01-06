@@ -19,12 +19,13 @@ public class FileHelper {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         String path = basePath + "/" + dateFormat.format(date);
         String newFileName = UUID.randomUUID().toString() + "." + extension;
+        newFileName = newFileName.replaceAll("-", "");
         File savedFile = new File(path);
         savedFile.mkdirs();
         savedFile = new File(path + "/" + newFileName);
         try {
-            //FileCopyUtils.copy(file.getInputStream(), new FileOutputStream(savedFile));
-            file.transferTo(savedFile); //отказывается работать (ссылается на неизвестный путь)
+            FileCopyUtils.copy(file.getInputStream(), new FileOutputStream(savedFile));
+            //file.transferTo(savedFile); //отказывается работать (ссылается на неизвестный путь)
         } catch (IOException e) {
             e.printStackTrace();
             return "";
