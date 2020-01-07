@@ -1,14 +1,13 @@
 package bgty.vt_41.bi.web;
 
 import bgty.vt_41.bi.entity.domain.Playlist;
-import bgty.vt_41.bi.entity.domain.Rating;
 import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.dto.AuthUserResult;
 import bgty.vt_41.bi.entity.dto.ORReject;
 import bgty.vt_41.bi.entity.dto.ORSuccess;
 import bgty.vt_41.bi.entity.dto.OperationResult;
-import bgty.vt_41.bi.repository.UserRepository;
+import bgty.vt_41.bi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,16 +23,16 @@ import java.util.Optional;
 @RequestMapping("api/users")
 public class UserController {
     @Autowired
-    UserRepository userRepository;
+    UserService userService;
 
     @PostMapping("/create")
     public ResponseEntity<OperationResult> create(@RequestPart String username, @RequestPart String email, @RequestPart String password)
     {
-        Optional<User> user = userRepository.findByUsername(username);
+        Optional<User> user = userService.findByUsername(username);
         if(user.isPresent()){
             return new ResponseEntity<>(new ORReject("Пользователь с таким логином уже существует"), HttpStatus.OK);
         }
-        user = userRepository.findByEmail(username);
+        user = userService.findByEmail(username);
         if(user.isPresent()){
             return new ResponseEntity<>(new ORReject("Данная электронная почта уже привязана к другому аккаунту"), HttpStatus.OK);
         }
@@ -41,7 +40,7 @@ public class UserController {
         newUser.setUsername(username);
         newUser.setEmail(email);
         newUser.setPassword(password);
-        User savedUser = userRepository.save(newUser);
+        User savedUser = userService.save(newUser);
         if(savedUser == null)
             return new ResponseEntity<>(new ORReject(), HttpStatus.OK);
         else
@@ -88,7 +87,7 @@ public class UserController {
         {
             Date date = new Date();
             user.setUpdatedAt(new Timestamp(date.getTime()));
-            user = userRepository.save(user);
+            user = userService.save(user);
             if(user == null)
                 return new ResponseEntity<>(new ORReject("Ошибка при сохранении изменений"), HttpStatus.OK);
         }
@@ -99,7 +98,7 @@ public class UserController {
     public void deleteUser(Authentication authentication)
     {
         User user = (User) authentication.getPrincipal();
-        userRepository.delete(user);
+        userService.delete(user);
     }
 
     @GetMapping("/loaded_video")
@@ -108,7 +107,7 @@ public class UserController {
     {
         if(username != null)
         {
-            Optional<User> optionalUser = userRepository.findByUsername(username);
+            Optional<User> optionalUser = userService.findByUsername(username);
             if(optionalUser.isEmpty()) return null;
             else return optionalUser.get().getLoadedVideo();
         }
@@ -126,7 +125,7 @@ public class UserController {
     {
         if(username != null)
         {
-            Optional<User> optionalUser = userRepository.findByUsername(username);
+            Optional<User> optionalUser = userService.findByUsername(username);
             if(optionalUser.isEmpty()) return null;
             else return optionalUser.get().getFavoriteVideo();
         }

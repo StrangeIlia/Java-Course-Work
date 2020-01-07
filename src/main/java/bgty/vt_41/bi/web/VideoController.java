@@ -3,8 +3,8 @@ package bgty.vt_41.bi.web;
 import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.dto.*;
-import bgty.vt_41.bi.repository.UserRepository;
-import bgty.vt_41.bi.repository.VideoRepository;
+import bgty.vt_41.bi.service.UserService;
+import bgty.vt_41.bi.service.VideoService;
 import bgty.vt_41.bi.util.FileHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,10 +23,10 @@ import java.util.Optional;
 @RequestMapping("api/videos")
 public class VideoController {
     @Autowired
-    VideoRepository videoRepository;
+    VideoService videoRepository;
 
-    @Autowired
-    UserRepository userRepository;
+    //@Autowired
+    //UserService userService;
 
     public static final String basePathForVideo = "uploads/videos";
     public static final String basePathForPreview = "uploads/previews";
@@ -52,8 +52,8 @@ public class VideoController {
         Video savedVideo = new Video();
         User user = (User) authentication.getPrincipal();
         //savedVideo.setAuthor(user); //НИКОГДА НЕ ДЕЛАЕТЕ ТАК
-        userRepository.findById(user.getId()).ifPresent(savedVideo::setAuthor); //Правильно так
-        /*Optional<User> optionalUser = Optional.of(user);
+        //userService.findById(user.getId()).ifPresent(savedVideo::setAuthor); //Правильно так
+        Optional<User> optionalUser = Optional.ofNullable(user);
         optionalUser.ifPresent(savedVideo::setAuthor); // Попытка схитрить не удалась ХД*/
         savedVideo.setName(sendVideo.getName());
         savedVideo.setDescription(sendVideo.getDescription());

@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum ERating {
     LIKE((byte)1),
-    UNLIKE((byte)0);
+    DISLIKE((byte)0);
 
     private byte value;
 
