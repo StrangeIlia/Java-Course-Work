@@ -25,7 +25,7 @@ public class FileController {
     @Autowired
     VideoService videoService;
 
-    private static final String filePath = "files";
+    public static final String filePath = "files";
     public static final Long maxPartSize = 1024L * 1024L;
 
     @GetMapping("**")

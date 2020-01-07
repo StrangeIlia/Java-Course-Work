@@ -6,6 +6,7 @@ import java.util.Optional;
 
 public interface UserService {
     Optional<User> findById(Integer id);
+    Optional<User> findByToken(String token);
     Optional<User> findByEmail(String email);
     Optional<User> findByUsername(String username);
     long count();

@@ -14,7 +14,7 @@ import java.util.Optional;
 @Component
 public class AuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
     @Autowired
-    AuthService customerService;
+    AuthService authService;
 
     @Override
     protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken) throws AuthenticationException {
@@ -28,7 +28,7 @@ public class AuthenticationProvider extends AbstractUserDetailsAuthenticationPro
         return  Optional
                 .ofNullable(token)
                 .map(String::valueOf)
-                .flatMap(customerService::findByToken)
+                .flatMap(authService::findByToken)
                 .orElseThrow(() -> new UsernameNotFoundException("Cannot find user with authentication token=" + token));
     }
 }

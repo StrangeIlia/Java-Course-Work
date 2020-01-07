@@ -47,4 +47,17 @@ public class Video implements Serializable {
     @ManyToMany(mappedBy = "videos")
     @JsonIgnore
     private Collection<Playlist> playlists;
+
+    @Override
+    @JsonIgnore
+    public boolean equals(Object object)
+    {
+        if(this == object) return true;
+        if(object instanceof Video)
+        {
+            Video tmp = (Video) object;
+            return tmp.getId().equals(this.getId());
+        }
+        return false;
+    }
 }

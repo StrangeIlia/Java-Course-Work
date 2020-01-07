@@ -19,6 +19,9 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
+    public Optional<User> findByToken(String token) { return userRepository.findByAccessToken(token); }
+
+    @Override
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }

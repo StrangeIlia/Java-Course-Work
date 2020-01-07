@@ -8,16 +8,20 @@ import bgty.vt_41.bi.entity.dto.ORReject;
 import bgty.vt_41.bi.entity.dto.ORSuccess;
 import bgty.vt_41.bi.entity.dto.OperationResult;
 import bgty.vt_41.bi.service.UserService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @RestController
 @RequestMapping("api/users")
@@ -103,20 +107,29 @@ public class UserController {
 
     @GetMapping("/loaded_video")
     public Collection<Video> getLoadedVideo(@RequestParam(required = false) String username,
-                                            Authentication authentication)
+                                            HttpServletRequest request)
     {
-        if(username != null)
+        if(!username.equals(""))
         {
             Optional<User> optionalUser = userService.findByUsername(username);
             if(optionalUser.isEmpty()) return null;
             else return optionalUser.get().getLoadedVideo();
         }
-        else if(authentication != null)
-        {
-            User user = (User) authentication.getPrincipal();
-            return user.getLoadedVideo();
+        else{
+            Optional<String> tokenParam =  Optional.ofNullable(request.getHeader(AUTHORIZATION));
+            if(tokenParam.isPresent())
+            {
+                String token = tokenParam.get();
+                token = StringUtils.removeStart(token, "Bearer").trim();
+                Optional<User> optionalUser = userService.findByToken(token);
+                if(optionalUser.isPresent())
+                {
+                    User user = optionalUser.get();
+                    return user.getLoadedVideo();
+                }
+            }
         }
-        else return null;
+        return null;
     }
 
     @GetMapping("/favorite_video")

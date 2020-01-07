@@ -35,4 +35,17 @@ public class Playlist implements Serializable {
             joinColumns = @JoinColumn(name = "playlistId", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "videoId", nullable = false))
     private Collection<Video> videos;
+
+    @Override
+    @JsonIgnore
+    public boolean equals(Object object)
+    {
+        if(this == object) return true;
+        if(object instanceof Playlist)
+        {
+            Playlist tmp = (Playlist) object;
+            return tmp.getId().equals(this.getId());
+        }
+        return false;
+    }
 }

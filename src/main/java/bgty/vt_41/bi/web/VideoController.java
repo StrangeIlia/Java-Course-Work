@@ -137,10 +137,15 @@ public class VideoController {
                             Authentication authentication)
     {
         Optional<Video> optionalVideo = videoRepository.findById(id);
-        if(optionalVideo.isPresent() && optionalVideo.get().getAuthor().equals(authentication.getPrincipal()))
+        if(optionalVideo.isPresent())
         {
             Video video = optionalVideo.get();
-            videoRepository.delete(video);
+            User author = video.getAuthor();
+            User user = (User) authentication.getPrincipal();
+            if(author.equals(user))
+            {
+                videoRepository.delete(video);
+            }
         }
     }
 

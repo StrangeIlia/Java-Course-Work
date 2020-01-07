@@ -122,4 +122,17 @@ public class User implements UserDetails, Serializable {
     {
         this.password = password;
     }
+
+    @Override
+    @JsonIgnore
+    public boolean equals(Object object)
+    {
+        if(this == object) return true;
+        if(object instanceof User)
+        {
+            User tmp = (User) object;
+            return tmp.getId().equals(this.getId());
+        }
+        return false;
+    }
 }
