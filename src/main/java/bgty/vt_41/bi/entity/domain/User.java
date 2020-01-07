@@ -5,6 +5,7 @@ import bgty.vt_41.bi.entity.enums.ERating;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,8 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -42,20 +45,21 @@ public class User implements UserDetails, Serializable {
     @JsonIgnore
     private Timestamp updatedAt;
     @JsonIgnore
+    @Column(length = 36)
     private String authKey;
     @JsonIgnore
     @Column(length = 36)
     private String accessToken;
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL) //Если удален пользователь, то удаляем все видео
     @JsonIgnore
     private Collection<Video> loadedVideo;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL) // все оценки
     @JsonIgnore
     private Collection<Rating> ratings;
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL) // и все созданные плейлисты
     @JsonIgnore
     private Collection<Playlist> createdPlaylists;
 
@@ -70,7 +74,15 @@ public class User implements UserDetails, Serializable {
         return videos;
     }
 
-    public User(){ super(); }
+    public User()
+    {
+        super();
+        Date date = new Date();
+        createdAt = new Timestamp(date.getTime());
+        updatedAt = new Timestamp(date.getTime());
+        accessToken = UUID.randomUUID().toString();
+        authKey = UUID.randomUUID().toString();
+    }
 
     public User(String username, String email, String password)
     {
@@ -123,9 +135,8 @@ public class User implements UserDetails, Serializable {
         this.password = password;
     }
 
-    @Override
     @JsonIgnore
-    public boolean equals(Object object)
+    public boolean equalsId(Object object)
     {
         if(this == object) return true;
         if(object instanceof User)

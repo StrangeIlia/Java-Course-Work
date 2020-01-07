@@ -3,10 +3,7 @@ package bgty.vt_41.bi.web;
 import bgty.vt_41.bi.entity.domain.Playlist;
 import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
-import bgty.vt_41.bi.entity.dto.AuthUserResult;
-import bgty.vt_41.bi.entity.dto.ORReject;
-import bgty.vt_41.bi.entity.dto.ORSuccess;
-import bgty.vt_41.bi.entity.dto.OperationResult;
+import bgty.vt_41.bi.entity.dto.*;
 import bgty.vt_41.bi.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,61 +26,60 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @PostMapping("/create")
-    public ResponseEntity<OperationResult> create(@RequestPart String username, @RequestPart String email, @RequestPart String password)
+    @PostMapping(value = "/create")
+    public ResponseEntity<OperationResult> create(@RequestBody CreationUserForm creationUserForm)
     {
-        Optional<User> user = userService.findByUsername(username);
+        if (!creationUserForm.isValid())
+            return ResponseEntity.ok(new ORReject("Не верная форма данных"));
+        Optional<User> user = userService.findByUsername(creationUserForm.getUsername());
         if(user.isPresent()){
-            return new ResponseEntity<>(new ORReject("Пользователь с таким логином уже существует"), HttpStatus.OK);
+            return ResponseEntity.ok(new ORReject("Пользователь с таким логином уже существует"));
         }
-        user = userService.findByEmail(username);
+        user = userService.findByEmail(creationUserForm.getEmail());
         if(user.isPresent()){
-            return new ResponseEntity<>(new ORReject("Данная электронная почта уже привязана к другому аккаунту"), HttpStatus.OK);
+            return ResponseEntity.ok(new ORReject("Данная электронная почта уже привязана к другому аккаунту"));
         }
         User newUser = new User();
-        newUser.setUsername(username);
-        newUser.setEmail(email);
-        newUser.setPassword(password);
+        newUser.setUsername(creationUserForm.getUsername());
+        newUser.setEmail(creationUserForm.getEmail());
+        newUser.setPassword(creationUserForm.getPassword());
         User savedUser = userService.save(newUser);
         if(savedUser == null)
-            return new ResponseEntity<>(new ORReject(), HttpStatus.OK);
+            return ResponseEntity.ok(new ORReject());
         else
-            return new ResponseEntity<>(new AuthUserResult(savedUser.getAccessToken()), HttpStatus.OK);
+            return ResponseEntity.ok(new AuthUserResult(savedUser.getAccessToken()));
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<OperationResult> update(@RequestPart String oldPassword,
-                                  @RequestPart(required = false) String username,
-                                  @RequestPart(required = false) String email,
-                                  @RequestPart(required = false) String newPassword,
-                                  Authentication authentication)
+    public ResponseEntity<OperationResult> update(@RequestBody UpdateUserForm updateUserForm,
+                                                  Authentication authentication)
     {
         User user = (User) authentication.getPrincipal();
-        if(user.checkPassword(oldPassword))
+        if(user.checkPassword(updateUserForm.getOldPassword()))
             return new ResponseEntity<>(new ORReject("Неверный пароль"), HttpStatus.OK);
 
         boolean isUpdate = false;
-        if(username != null)
+        if(updateUserForm.getUsername() != null)
         {
-            if(!user.getUsername().equals(username))
+            if(!user.getUsername().equals(updateUserForm.getUsername()))
             {
-                user.setUsername(username);
+                user.setUsername(updateUserForm.getUsername());
                 isUpdate = true;
             }
         }
-        if(email != null)
+        if(updateUserForm.getEmail() != null)
         {
-            if(!user.getEmail().equals(email))
+            if(!user.getEmail().equals(updateUserForm.getEmail()))
             {
-                user.setEmail(email);
+                user.setEmail(updateUserForm.getEmail());
                 isUpdate = true;
             }
         }
-        if(newPassword != null)
+        if(updateUserForm.getNewPassword() != null)
         {
-            if(!user.getPassword().equals(newPassword))
+            if(!user.getPassword().equals(updateUserForm.getNewPassword()))
             {
-                user.setPassword(newPassword);
+                user.setPassword(updateUserForm.getNewPassword());
                 isUpdate = true;
             }
         }
@@ -134,7 +130,7 @@ public class UserController {
 
     @GetMapping("/favorite_video")
     public Collection<Video> getFavoriteVideoNonAuth(@RequestParam String username,
-                                                     Authentication authentication)
+                                                     HttpServletRequest request)
     {
         if(username != null)
         {
@@ -142,9 +138,21 @@ public class UserController {
             if(optionalUser.isEmpty()) return null;
             else return optionalUser.get().getFavoriteVideo();
         }
-        else if(authentication != null)
-            return ((User) authentication.getPrincipal()).getFavoriteVideo();
-        else return null;
+        else{
+            Optional<String> tokenParam =  Optional.ofNullable(request.getHeader(AUTHORIZATION));
+            if(tokenParam.isPresent())
+            {
+                String token = tokenParam.get();
+                token = StringUtils.removeStart(token, "Bearer").trim();
+                Optional<User> optionalUser = userService.findByToken(token);
+                if(optionalUser.isPresent())
+                {
+                    User user = optionalUser.get();
+                    return user.getFavoriteVideo();
+                }
+            }
+        }
+        return null;
     }
 
     @GetMapping("/playlists")

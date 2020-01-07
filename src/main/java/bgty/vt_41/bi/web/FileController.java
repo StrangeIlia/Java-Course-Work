@@ -50,9 +50,9 @@ public class FileController {
                         {
                             Video video = optionalVideo.get();
                             video.setNumberOfViews(video.getNumberOfViews() + 1);
+                            videoService.save(video);
                         }
                     }
-
                     return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                             .contentType(MediaTypeFactory
                                     .getMediaType(resource)

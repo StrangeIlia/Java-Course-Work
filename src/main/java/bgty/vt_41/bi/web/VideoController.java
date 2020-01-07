@@ -25,8 +25,8 @@ public class VideoController {
     @Autowired
     VideoService videoRepository;
 
-    //@Autowired
-    //UserService userService;
+    @Autowired
+    UserService userService;
 
     public static final String basePathForVideo = "uploads/videos";
     public static final String basePathForPreview = "uploads/previews";
@@ -48,19 +48,16 @@ public class VideoController {
                                                        Authentication authentication)
     {
 
-        Date date = new Date();
         Video savedVideo = new Video();
         User user = (User) authentication.getPrincipal();
         //savedVideo.setAuthor(user); //НИКОГДА НЕ ДЕЛАЕТЕ ТАК
-        //userService.findById(user.getId()).ifPresent(savedVideo::setAuthor); //Правильно так
-        Optional<User> optionalUser = Optional.ofNullable(user);
-        optionalUser.ifPresent(savedVideo::setAuthor); // Попытка схитрить не удалась ХД*/
+        userService.findById(user.getId()).ifPresent(savedVideo::setAuthor); //Правильно так
+        /*Optional<User> optionalUser = Optional.ofNullable(user);
+        optionalUser.ifPresent(savedVideo::setAuthor);*/ // Попытка схитрить не удалась ХД (нужно подгружать связи)
         savedVideo.setName(sendVideo.getName());
         savedVideo.setDescription(sendVideo.getDescription());
         savedVideo.setPath(saveVideo(sendVideo.getVideo()));
         savedVideo.setPreview(savePreview(sendVideo.getPreview()));
-        savedVideo.setCreatedAt(new java.sql.Timestamp(date.getTime()));
-        savedVideo.setUpdatedAt(new java.sql.Timestamp(date.getTime()));
         try {
             if(videoRepository.save(savedVideo) != null)
                 return ResponseEntity.ok(new ORSuccess());
@@ -83,10 +80,10 @@ public class VideoController {
     {
         Optional<Video> updatedVideo = videoRepository.findById(id);
         if(updatedVideo.isEmpty())
-            return new ResponseEntity<>(new ORReject("Нет видео с таким id"), HttpStatus.OK);
+            return ResponseEntity.ok(new ORReject("Нет видео с таким id"));
         Video savedVideo = updatedVideo.get();
-        if(!savedVideo.getAuthor().equals(authentication.getPrincipal()))
-            return new ResponseEntity<>(new ORReject("У вас нет прав на обновление этого видео"), HttpStatus.OK);
+        if(!savedVideo.getAuthor().equalsId(authentication.getPrincipal()))
+            return ResponseEntity.ok(new ORReject("У вас нет прав на обновление этого видео"));
         boolean isUpdated = false;
         if(sendVideo.getName() != null) {
             if(!savedVideo.getName().equals(sendVideo.getName())){
@@ -98,27 +95,26 @@ public class VideoController {
         {
             if(savedVideo.getDescription() == null || !savedVideo.getDescription().equals(sendVideo.getDescription()))
             {
-                savedVideo.setName(sendVideo.getDescription());
+                savedVideo.setDescription(sendVideo.getDescription());
                 isUpdated = true;
             }
         }
 
         if(sendVideo.getVideo() != null)
         {
-            File savedFile = new File(basePathForVideo + "/" + savedVideo.getPath());
             try {
-                sendVideo.getVideo().transferTo(savedFile);
+                FileHelper.rebase(sendVideo.getVideo(), savedVideo.getPath());
+                savedVideo.setNumberOfViews(0);
             } catch (IOException e) {
-                return new ResponseEntity<>(new ORReject("Ошибка при загрузке видео"), HttpStatus.OK);
+                return ResponseEntity.ok(new ORReject("Ошибка при загрузке видео"));
             }
         }
         if(sendVideo.getPreview() != null)
         {
-            File savedFile = new File(basePathForPreview + "/" + savedVideo.getPath());
             try {
-                sendVideo.getPreview().transferTo(savedFile);
+                FileHelper.rebase(sendVideo.getPreview(), savedVideo.getPreview());
             } catch (IOException e) {
-                return new ResponseEntity<>(new ORReject("Ошибка при загрузке превью"), HttpStatus.OK);
+                return ResponseEntity.ok(new ORReject("Ошибка при загрузке превью"));
             }
         }
         if(isUpdated)
@@ -127,7 +123,7 @@ public class VideoController {
             savedVideo.setUpdatedAt(new Timestamp(date.getTime()));
             savedVideo = videoRepository.save(savedVideo);
             if(savedVideo == null)
-                return new ResponseEntity<>(new ORReject("Ошибка при сохранении видео"), HttpStatus.OK);
+                return ResponseEntity.ok(new ORReject("Ошибка при сохранении видео"));
         }
         return ResponseEntity.ok(new UpdateVideoResult(savedVideo));
     }
@@ -141,11 +137,8 @@ public class VideoController {
         {
             Video video = optionalVideo.get();
             User author = video.getAuthor();
-            User user = (User) authentication.getPrincipal();
-            if(author.equals(user))
-            {
+            if(author.equalsId(authentication.getPrincipal()))
                 videoRepository.delete(video);
-            }
         }
     }
 

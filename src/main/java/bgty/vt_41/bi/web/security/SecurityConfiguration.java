@@ -33,7 +33,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             new AntPathRequestMatcher("/api/videos/create"),
             new AntPathRequestMatcher("/api/videos/update"),
             new AntPathRequestMatcher("/api/videos/delete"),
-            new AntPathRequestMatcher("/api/users/create"),
             new AntPathRequestMatcher("/api/users/update"),
             new AntPathRequestMatcher("/api/users/delete"),
             new AntPathRequestMatcher("/api/site/get_username"),

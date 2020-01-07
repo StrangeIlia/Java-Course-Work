@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class ORSerializer extends JsonSerializer<EStatus> {
     @Override
-    public void serialize(EStatus user, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        jsonGenerator.writeObject(user.toString().toLowerCase());
+    public void serialize(EStatus status, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        jsonGenerator.writeObject(status.toString().toLowerCase());
     }
 }

@@ -4,6 +4,7 @@ import bgty.vt_41.bi.entity.domain.keys_classes.VideoUserKey;
 import bgty.vt_41.bi.entity.enums.ERating;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 
@@ -13,19 +14,18 @@ import javax.persistence.*;
 @IdClass(VideoUserKey.class)
 public class Rating {
     @Id
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "userId", nullable = false)
     private User user;
     @Id
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "videoId", nullable = false)
     private Video video;
     @Column(name = "rating", nullable = false)
     private ERating rating;
 
-    @Override
     @JsonIgnore
-    public boolean equals(Object object)
+    public boolean equalsId(Object object)
     {
         if(this == object) return true;
         if(object instanceof Rating)

@@ -12,6 +12,12 @@ import java.util.Date;
 import java.util.UUID;
 
 public class FileHelper {
+    public static void rebase(MultipartFile file, String filename) throws IOException {
+        File savedFile = new File(filename);
+        if(!savedFile.exists()) return;
+        FileCopyUtils.copy(file.getInputStream(), new FileOutputStream(savedFile));
+    }
+
     public static String saveFile(MultipartFile file, String basePath)
     {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
