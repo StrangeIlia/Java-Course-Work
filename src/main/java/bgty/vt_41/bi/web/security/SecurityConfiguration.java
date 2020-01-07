@@ -2,8 +2,10 @@ package bgty.vt_41.bi.web.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -20,20 +22,22 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private static final RequestMatcher PROTECTED_URLS = new OrRequestMatcher(
             //Явно указываю методы, ибо без этого OPTIONS запросы не работают
-            new AntPathRequestMatcher("/api/videos/create", "POST"),
-            new AntPathRequestMatcher("/api/videos/update", "PATCH"),
-            new AntPathRequestMatcher("/api/videos/delete", "DELETE"),
-            new AntPathRequestMatcher("/api/users/create", "POST"),
-            new AntPathRequestMatcher("/api/users/update", "PATCH"),
-            new AntPathRequestMatcher("/api/users/delete", "DELETE"),
-            new AntPathRequestMatcher("/api/site/get_username", "GET"),
-            new AntPathRequestMatcher("/api/site/logout", "POST")
+            new AntPathRequestMatcher("/api/videos/create"),
+            new AntPathRequestMatcher("/api/videos/update"),
+            new AntPathRequestMatcher("/api/videos/delete"),
+            new AntPathRequestMatcher("/api/users/create"),
+            new AntPathRequestMatcher("/api/users/update"),
+            new AntPathRequestMatcher("/api/users/delete"),
+            new AntPathRequestMatcher("/api/site/get_username"),
+            new AntPathRequestMatcher("/api/site/logout")
     );
 
     AuthenticationProvider provider;
@@ -50,13 +54,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(final WebSecurity webSecurity) {
-        //webSecurity.ignoring().antMatchers("/token/**");
         webSecurity.ignoring().antMatchers(HttpMethod.OPTIONS);
     }
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.sessionManagement()
+        http
+                .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .exceptionHandling()
@@ -70,7 +74,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .formLogin().disable()
                 .httpBasic().disable()
-                .logout().disable();
+                .logout().disable()
+                .headers()
+                .contentTypeOptions().disable()
+        ;
 
     }
 
