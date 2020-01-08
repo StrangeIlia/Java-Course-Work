@@ -104,17 +104,23 @@ public class DefaultVideoService implements VideoService {
 
     @Override
     public void rating(User user, Video video, ERating rating) {
-        Rating newRating;
         Optional<Rating> optionalRating = ratingRepository.findByUserAndVideo(user, video);
-        if (optionalRating.isPresent())
-            newRating = optionalRating.get();
-        else {
-            newRating = new Rating();
-            userRepository.findById(user.getId()).ifPresent(newRating::setUser);
-            videoRepository.findById(video.getId()).ifPresent(newRating::setVideo);
+        if (rating == null) {
+            if (optionalRating.isPresent())
+                ratingRepository.delete(optionalRating.get());
+        } else {
+            Rating newRating;
+            if (optionalRating.isPresent())
+                newRating = optionalRating.get();
+            else {
+                newRating = new Rating();
+                userRepository.findById(user.getId()).ifPresent(newRating::setUser);
+                videoRepository.findById(video.getId()).ifPresent(newRating::setVideo);
+            }
+
+            newRating.setRating(rating);
+            ratingRepository.save(newRating);
         }
-        newRating.setRating(rating);
-        ratingRepository.save(newRating);
     }
 
     @Override
