@@ -4,7 +4,6 @@ import bgty.vt_41.bi.util.json_serializer.UserSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -33,7 +32,7 @@ public class Playlist implements Serializable {
         updatedAt = new Timestamp(date.getTime());
     }
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "author", nullable = false)
     @JsonSerialize(using = UserSerializer.class)
     private User author;
@@ -58,8 +57,12 @@ public class Playlist implements Serializable {
     }
 
     @PreRemove //Удаляем только связи!!!
-    private void preRemove()
-    {
+    private void preRemove() {
         getVideos().clear();
+    }
+
+    @Override
+    public String toString() {
+        return "Playlist: name=" + getName();
     }
 }

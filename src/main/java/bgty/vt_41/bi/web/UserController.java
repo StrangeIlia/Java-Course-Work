@@ -5,38 +5,36 @@ import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.dto.*;
 import bgty.vt_41.bi.service.UserService;
-import org.apache.commons.lang3.StringUtils;
+import bgty.vt_41.bi.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
-
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @RestController
 @RequestMapping("api/users")
 public class UserController {
     @Autowired
     UserService userService;
+    @Autowired
+    VideoService videoService;
 
     @PostMapping(value = "/create")
-    public ResponseEntity<OperationResult> create(@RequestBody CreationUserForm creationUserForm)
-    {
+    public ResponseEntity<OperationResult> create(@RequestBody CreationUserForm creationUserForm) {
         if (!creationUserForm.isValid())
             return ResponseEntity.ok(new ORReject("Не верная форма данных"));
         Optional<User> user = userService.findByUsername(creationUserForm.getUsername());
-        if(user.isPresent()){
+        if (user.isPresent()) {
             return ResponseEntity.ok(new ORReject("Пользователь с таким логином уже существует"));
         }
         user = userService.findByEmail(creationUserForm.getEmail());
-        if(user.isPresent()){
+        if (user.isPresent()) {
             return ResponseEntity.ok(new ORReject("Данная электронная почта уже привязана к другому аккаунту"));
         }
         User newUser = new User();
@@ -102,62 +100,33 @@ public class UserController {
     }
 
     @GetMapping("/loaded_video")
-    public Collection<Video> getLoadedVideo(@RequestParam(required = false) String username,
-                                            HttpServletRequest request)
-    {
-        if(!username.equals(""))
-        {
+    public Collection<Video> getLoadedVideo(@RequestParam String username) {
+        if (!username.equals("")) {
             Optional<User> optionalUser = userService.findByUsername(username);
-            if(optionalUser.isEmpty()) return null;
+            if (optionalUser.isEmpty()) return null;
             else return optionalUser.get().getLoadedVideo();
-        }
-        else{
-            Optional<String> tokenParam =  Optional.ofNullable(request.getHeader(AUTHORIZATION));
-            if(tokenParam.isPresent())
-            {
-                String token = tokenParam.get();
-                token = StringUtils.removeStart(token, "Bearer").trim();
-                Optional<User> optionalUser = userService.findByToken(token);
-                if(optionalUser.isPresent())
-                {
-                    User user = optionalUser.get();
-                    return user.getLoadedVideo();
-                }
-            }
         }
         return null;
     }
 
     @GetMapping("/favorite_video")
-    public Collection<Video> getFavoriteVideoNonAuth(@RequestParam String username,
-                                                     HttpServletRequest request)
-    {
-        if(username != null)
-        {
+    public Collection<Video> getFavoriteVideo(@RequestParam String username) {
+        if (username != null) {
             Optional<User> optionalUser = userService.findByUsername(username);
-            if(optionalUser.isEmpty()) return null;
-            else return optionalUser.get().getFavoriteVideo();
-        }
-        else{
-            Optional<String> tokenParam =  Optional.ofNullable(request.getHeader(AUTHORIZATION));
-            if(tokenParam.isPresent())
-            {
-                String token = tokenParam.get();
-                token = StringUtils.removeStart(token, "Bearer").trim();
-                Optional<User> optionalUser = userService.findByToken(token);
-                if(optionalUser.isPresent())
-                {
-                    User user = optionalUser.get();
-                    return user.getFavoriteVideo();
-                }
-            }
+            if (optionalUser.isEmpty()) return null;
+            Collection<Video> videos = videoService.getFavorites(optionalUser.get());
+            return videos;
         }
         return null;
     }
 
     @GetMapping("/playlists")
-    public Collection<Playlist> getCreatedPlaylists(Authentication authentication)
-    {
-        return ((User)authentication.getPrincipal()).getCreatedPlaylists();
+    public Collection<Playlist> getCreatedPlaylists(@RequestParam(required = false) String username) {
+        if (!username.equals("")) {
+            Optional<User> optionalUser = userService.findByUsername(username);
+            if (optionalUser.isEmpty()) return null;
+            else return optionalUser.get().getCreatedPlaylists();
+        }
+        return null;
     }
 }

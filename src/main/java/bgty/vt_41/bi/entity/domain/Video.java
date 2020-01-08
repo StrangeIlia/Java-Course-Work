@@ -1,11 +1,11 @@
 package bgty.vt_41.bi.entity.domain;
 
+import bgty.vt_41.bi.util.json_serializer.DateSerializer;
 import bgty.vt_41.bi.util.json_serializer.PathFilesSerializer;
 import bgty.vt_41.bi.util.json_serializer.UserSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -33,8 +33,10 @@ public class Video implements Serializable {
     @Column(name = "numberOfViews", columnDefinition = "int default 0")
     private Integer numberOfViews = 0;
     @Column(name = "createdAt", nullable = false)
+    @JsonSerialize(using = DateSerializer.class)
     private Timestamp createdAt;
     @Column(name = "updatedAt", nullable = false)
+    @JsonSerialize(using = DateSerializer.class)
     private Timestamp updatedAt;
 
     public Video()
@@ -45,7 +47,7 @@ public class Video implements Serializable {
         updatedAt = new Timestamp(date.getTime());
     }
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "author", nullable = false)
     @JsonSerialize(using = UserSerializer.class) // чтобы было "author" : "<name>" вместо "author" : { "username" : "<name>" }
     private User author;
@@ -71,8 +73,12 @@ public class Video implements Serializable {
     }
 
     @PreRemove //Удаляем только связи!!!
-    private void preRemove()
-    {
+    private void preRemove() {
         getPlaylists().clear();
+    }
+
+    @Override
+    public String toString() {
+        return "Video: name=" + getName() + "; path=" + getPath() + "; preview=" + getPreview();
     }
 }

@@ -1,11 +1,9 @@
 package bgty.vt_41.bi.entity.domain;
 
 
-import bgty.vt_41.bi.entity.enums.ERating;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,7 +12,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
@@ -51,7 +48,7 @@ public class User implements UserDetails, Serializable {
     @Column(length = 36)
     private String accessToken;
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL) //Если удален пользователь, то удаляем все видео
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL) //Если удален пользователь, то удаляем все видео
     @JsonIgnore
     private Collection<Video> loadedVideo;
 
@@ -62,17 +59,6 @@ public class User implements UserDetails, Serializable {
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL) // и все созданные плейлисты
     @JsonIgnore
     private Collection<Playlist> createdPlaylists;
-
-    @JsonIgnore
-    public Collection<Video> getFavoriteVideo()
-    {
-        Collection<Video> videos = new ArrayList<>();
-        ratings.forEach(x -> {
-            if(x.getRating() == ERating.LIKE)
-                videos.add(x.getVideo());
-        });
-        return videos;
-    }
 
     public User()
     {
@@ -136,14 +122,18 @@ public class User implements UserDetails, Serializable {
     }
 
     @JsonIgnore
-    public boolean equalsId(Object object)
-    {
-        if(this == object) return true;
-        if(object instanceof User)
-        {
+    public boolean equalsId(Object object) {
+        if (this == object) return true;
+        if (object instanceof User) {
             User tmp = (User) object;
             return tmp.getId().equals(this.getId());
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "User: username=" + getUsername() + "; password=" + getPassword()
+                + "; email=" + getEmail() + "; accessToken=" + getAccessToken();
     }
 }

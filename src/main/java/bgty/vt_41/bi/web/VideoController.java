@@ -1,8 +1,10 @@
 package bgty.vt_41.bi.web;
 
+import bgty.vt_41.bi.entity.domain.Rating;
 import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.dto.*;
+import bgty.vt_41.bi.entity.enums.ERating;
 import bgty.vt_41.bi.service.UserService;
 import bgty.vt_41.bi.service.VideoService;
 import bgty.vt_41.bi.util.FileHelper;
@@ -13,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @RequestMapping("api/videos")
 public class VideoController {
     @Autowired
-    VideoService videoRepository;
+    VideoService videoService;
 
     @Autowired
     UserService userService;
@@ -34,13 +35,13 @@ public class VideoController {
     @GetMapping(value = {"", "/index"})
     public Iterable<Video> getAllVideo()
     {
-        return videoRepository.findAll();
+        return videoService.findAll();
     }
 
     @GetMapping("/view")
     public Optional<Video> getVideo(@RequestParam Integer id)
     {
-        return videoRepository.findById(id);
+        return videoService.findById(id);
     }
 
     @PostMapping(value = "/create", consumes = "multipart/form-data")
@@ -59,7 +60,7 @@ public class VideoController {
         savedVideo.setPath(saveVideo(sendVideo.getVideo()));
         savedVideo.setPreview(savePreview(sendVideo.getPreview()));
         try {
-            if(videoRepository.save(savedVideo) != null)
+            if (videoService.save(savedVideo) != null)
                 return ResponseEntity.ok(new ORSuccess());
             else
                 return ResponseEntity.ok(new ORReject("Не удалось сохранить видео"));
@@ -67,7 +68,7 @@ public class VideoController {
         catch (Exception e){
             e.printStackTrace();
         }
-        if(videoRepository.save(savedVideo) != null)
+        if (videoService.save(savedVideo) != null)
             return new ResponseEntity<>(new ORSuccess(), HttpStatus.OK);
         else
             return new ResponseEntity<>(new ORReject("Не удалось сохранить видео"), HttpStatus.OK);
@@ -78,7 +79,7 @@ public class VideoController {
                                                        @ModelAttribute VideoForm sendVideo,
                                                        Authentication authentication)
     {
-        Optional<Video> updatedVideo = videoRepository.findById(id);
+        Optional<Video> updatedVideo = videoService.findById(id);
         if(updatedVideo.isEmpty())
             return ResponseEntity.ok(new ORReject("Нет видео с таким id"));
         Video savedVideo = updatedVideo.get();
@@ -121,7 +122,7 @@ public class VideoController {
         {
             Date date = new Date();
             savedVideo.setUpdatedAt(new Timestamp(date.getTime()));
-            savedVideo = videoRepository.save(savedVideo);
+            savedVideo = videoService.save(savedVideo);
             if(savedVideo == null)
                 return ResponseEntity.ok(new ORReject("Ошибка при сохранении видео"));
         }
@@ -130,15 +131,63 @@ public class VideoController {
 
     @DeleteMapping("/delete")
     public void deleteVideo(@RequestParam("id") Integer id,
-                            Authentication authentication)
-    {
-        Optional<Video> optionalVideo = videoRepository.findById(id);
-        if(optionalVideo.isPresent())
-        {
+                            Authentication authentication) {
+        Optional<Video> optionalVideo = videoService.findById(id);
+        if (optionalVideo.isPresent()) {
             Video video = optionalVideo.get();
             User author = video.getAuthor();
-            if(author.equalsId(authentication.getPrincipal()))
-                videoRepository.delete(video);
+            if (author.equalsId(authentication.getPrincipal()))
+                videoService.delete(video);
+        }
+    }
+
+    @GetMapping("/rating")
+    public Object getRating(@RequestParam Integer id) {
+        Optional<Video> optionalVideo = videoService.findById(id);
+        if (optionalVideo.isEmpty()) return null;
+        else return new Object() {
+            public long liked = videoService.countLiked(optionalVideo.get());
+            public long disliked = videoService.countDisliked(optionalVideo.get());
+        };
+    }
+
+    @PostMapping("/rating")
+    public ResponseEntity<OperationResult> setRating(@RequestParam Integer id,
+                                                     @RequestBody ERating rating,
+                                                     Authentication authentication) {
+        Optional<Video> optionalVideo = videoService.findById(id);
+        if (optionalVideo.isEmpty()) return ResponseEntity.ok(new ORReject("Нет видео с таким id"));
+        if (rating == ERating.LIKE || rating == ERating.DISLIKE) {
+            User pseudoUser = (User) authentication.getPrincipal();
+            Optional<User> optionalUser = userService.findById(pseudoUser.getId());
+            User user = optionalUser.get();
+            videoService.rating(user, optionalVideo.get(), rating);
+        }
+        return ResponseEntity.ok(new ORReject("Не верно указана оценка"));
+    }
+
+    @GetMapping("/liked")
+    public Object isLiked(@RequestParam Integer id, Authentication authentication) {
+        Optional<Video> optionalVideo = videoService.findById(id);
+        if (optionalVideo.isPresent()) {
+            User pseudoUser = (User) authentication.getPrincipal();
+            Optional<Rating> optionalRating = videoService.isLiked(pseudoUser, optionalVideo.get());
+            if (optionalRating.isPresent())
+                return new Object() {
+                    public String liked = optionalRating.get().getRating() == ERating.LIKE ? "like" : "dislike";
+                };
+        }
+        return new Object() {
+            public String liked = "none";
+        };
+    }
+
+    @PostMapping("/liked")
+    public void setLiked(@RequestParam Integer id, @RequestBody LikeForm like, Authentication authentication) {
+        Optional<Video> optionalVideo = videoService.findById(id);
+        if (optionalVideo.isPresent()) {
+            User pseudoUser = (User) authentication.getPrincipal();
+            videoService.rating(pseudoUser, optionalVideo.get(), like.getRating());
         }
     }
 

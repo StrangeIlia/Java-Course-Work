@@ -5,12 +5,15 @@ import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.enums.ERating;
 import bgty.vt_41.bi.repository.RatingRepository;
+import bgty.vt_41.bi.repository.UserRepository;
 import bgty.vt_41.bi.repository.VideoRepository;
 import bgty.vt_41.bi.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DefaultVideoService implements VideoService {
@@ -18,6 +21,8 @@ public class DefaultVideoService implements VideoService {
     VideoRepository videoRepository;
     @Autowired
     RatingRepository ratingRepository;
+    @Autowired
+    UserRepository userRepository;
 
     @Override
     public Optional<Video> findById(Integer id) {
@@ -95,5 +100,47 @@ public class DefaultVideoService implements VideoService {
     @Override
     public boolean existsById(Integer id) {
         return videoRepository.existsById(id);
+    }
+
+    @Override
+    public void rating(User user, Video video, ERating rating) {
+        Rating newRating;
+        Optional<Rating> optionalRating = ratingRepository.findByUserAndVideo(user, video);
+        if (optionalRating.isPresent())
+            newRating = optionalRating.get();
+        else {
+            newRating = new Rating();
+            userRepository.findById(user.getId()).ifPresent(newRating::setUser);
+            videoRepository.findById(video.getId()).ifPresent(newRating::setVideo);
+        }
+        newRating.setRating(rating);
+        ratingRepository.save(newRating);
+    }
+
+    @Override
+    public Optional<Rating> isLiked(User user, Video video) {
+        return video.getRatings().stream().filter(x -> x.getUser().equalsId(user)).findFirst();
+    }
+
+    @Override
+    public long countLiked(Video video) {
+        Collection<Rating> ratings = video.getRatings();
+        return ratings.stream().filter(x -> x.getRating().equals(ERating.LIKE)).count();
+    }
+
+    @Override
+    public long countDisliked(Video video) {
+        Collection<Rating> ratings = video.getRatings();
+        return ratings.stream().filter(x -> x.getRating().equals(ERating.DISLIKE)).count();
+    }
+
+    @Override
+    public Collection<Video> getFavorites(User user) {
+        return user
+                .getRatings()
+                .stream()
+                .filter(x -> x.getRating() == ERating.LIKE)
+                .map(Rating::getVideo)
+                .collect(Collectors.toList());
     }
 }
