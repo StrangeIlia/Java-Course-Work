@@ -41,8 +41,7 @@ public class FileController {
                 String range = request.getHeader(RANGE);
                 if(range == null)
                 {
-                    long count = resource.contentLength();
-                    ResourceRegion region = new ResourceRegion(resource, 0, count);
+                    ResourceRegion region = new ResourceRegion(resource, 0, maxPartSize);
                     if(filename.contains(VideoController.basePathForVideo))
                     {
                         Optional<Video> optionalVideo = videoService.findByPath(filename);
