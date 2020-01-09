@@ -1,5 +1,6 @@
 package bgty.vt_41.bi.entity.domain;
 
+import bgty.vt_41.bi.util.FileHelper;
 import bgty.vt_41.bi.util.json_serializer.DateSerializer;
 import bgty.vt_41.bi.util.json_serializer.PathFilesSerializer;
 import bgty.vt_41.bi.util.json_serializer.UserSerializer;
@@ -72,8 +73,10 @@ public class Video implements Serializable {
         return false;
     }
 
-    @PreRemove //Удаляем только связи!!!
+    @PreRemove //Удаляем только связи и файлы!!!
     private void preRemove() {
+        FileHelper.deleteFile(this.getPath());
+        FileHelper.deleteFile(this.getPreview());
         getPlaylists().clear();
     }
 

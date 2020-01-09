@@ -20,6 +20,11 @@ public class FileHelper {
         return savedFile.getPath();
     }
 
+    public static void deleteFile(String filename) {
+        File file = new File(filename);
+        file.deleteOnExit();
+    }
+
     public static String saveFile(MultipartFile file, String basePath) {
         if (file == null) return null;
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
