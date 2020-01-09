@@ -7,6 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
@@ -21,8 +24,21 @@ public class FileHelper {
     }
 
     public static void deleteFile(String filename) {
-        File file = new File(filename);
-        file.deleteOnExit();
+        Path filePath = Paths.get(filename);
+        try {
+            Files.deleteIfExists(filePath); //Удаляем файл
+
+            //Удаляем все пустые директории
+            /*while (true){
+                filePath = filePath.getParent();
+                long fileCount = Files.list(filePath).count();
+                if(fileCount == 0L)
+                    Files.deleteIfExists(filePath);
+                else break;
+            }*/
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static String saveFile(MultipartFile file, String basePath) {
