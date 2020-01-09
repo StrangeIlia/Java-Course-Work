@@ -46,7 +46,7 @@ public class VideoController {
     public ResponseEntity<OperationResult> createVideo(@ModelAttribute VideoForm sendVideo,
                                                        Authentication authentication) {
         String path = saveVideo(sendVideo.getVideo());
-        String preview = saveVideo(sendVideo.getPreview());
+        String preview = savePreview(sendVideo.getPreview());
         User user = (User) authentication.getPrincipal();
         try {
             videoService.create(

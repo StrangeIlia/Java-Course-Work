@@ -15,6 +15,7 @@ import java.util.Date;
 @Entity
 @Table(name = "Playlists")
 public class Playlist implements Serializable {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column(name = "name", nullable = false)

@@ -5,7 +5,6 @@ import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.dto.*;
 import bgty.vt_41.bi.service.UserService;
-import bgty.vt_41.bi.service.VideoService;
 import bgty.vt_41.bi.util.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,8 +19,6 @@ import java.util.Collection;
 public class UserController {
     @Autowired
     UserService userService;
-    @Autowired
-    VideoService videoService;
 
     @PostMapping(value = "/create")
     public ResponseEntity<OperationResult> create(@RequestBody CreationUserForm creationUserForm) {
