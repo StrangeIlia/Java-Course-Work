@@ -4,6 +4,7 @@ import bgty.vt_41.bi.entity.domain.Rating;
 import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.enums.ERating;
+import bgty.vt_41.bi.util.exceptions.VideoException;
 
 import java.util.Optional;
 
@@ -37,4 +38,10 @@ public interface VideoService {
     long countLiked(Video video);
 
     long countDisliked(Video video);
+
+    Video create(User user, String name, String description, String path, String preview) throws VideoException;
+
+    Video update(Integer id, User user, String name, String description, String path, String preview) throws VideoException;
+
+    void deleteById(User user, Integer videoId);
 }

@@ -25,15 +25,15 @@ public interface PlaylistsService {
 
     Playlist save(Playlist playlist);
 
-    Playlist create(String name, Integer userId);
+    Playlist create(User user, String name);
 
-    void deleteById(Integer id, Integer userId);
+    void deleteById(User user, Integer id);
 
     Collection<Playlist> findByAuthor(String username);
 
     Collection<Video> findVideosById(Integer id);
 
-    void addVideoInPlaylist(Integer videoId, Integer playlistId, Integer userId);
+    void addVideoInPlaylist(User user, Integer videoId, Integer playlistId);
 
-    void deleteVideoInPlaylist(Integer videoId, Integer playlistId, Integer userId);
+    void deleteVideoInPlaylist(User user, Integer videoId, Integer playlistId);
 }

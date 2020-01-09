@@ -12,14 +12,16 @@ import java.util.Date;
 import java.util.UUID;
 
 public class FileHelper {
-    public static void rebase(MultipartFile file, String filename) throws IOException {
+    public static String rebase(MultipartFile file, String filename) throws IOException {
+        if (file == null) return null;
         File savedFile = new File(filename);
-        if(!savedFile.exists()) return;
+        if (!savedFile.exists()) return null;
         FileCopyUtils.copy(file.getInputStream(), new FileOutputStream(savedFile));
+        return savedFile.getPath();
     }
 
-    public static String saveFile(MultipartFile file, String basePath)
-    {
+    public static String saveFile(MultipartFile file, String basePath) {
+        if (file == null) return null;
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
         Date date = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");

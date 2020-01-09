@@ -126,8 +126,6 @@ public class DefaultUserService implements UserService {
     @Override
     public Collection<Playlist> getCreatedPlaylists(String username) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isPresent())
-            return optionalUser.get().getCreatedPlaylists();
-        return null;
+        return optionalUser.map(User::getCreatedPlaylists).orElse(null);
     }
 }

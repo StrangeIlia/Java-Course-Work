@@ -122,13 +122,8 @@ public class User implements UserDetails, Serializable {
     }
 
     @JsonIgnore
-    public boolean equalsId(Object object) {
-        if (this == object) return true;
-        if (object instanceof User) {
-            User tmp = (User) object;
-            return tmp.getId().equals(this.getId());
-        }
-        return false;
+    public boolean equalsId(Integer object) {
+        return object.equals(this.getId());
     }
 
     @Override

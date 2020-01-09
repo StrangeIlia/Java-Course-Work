@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/playlists")
@@ -24,11 +25,19 @@ public class PlaylistController {
         return playlistsService.findByAuthor(username);
     }
 
+    @GetMapping("/view")
+    public Playlist getPlaylists(@RequestParam Integer id) {
+        Optional<Playlist> optionalPlaylist = playlistsService.findById(id);
+        return optionalPlaylist.orElse(null);
+    }
+
     @PostMapping("/create")
-    public Object createPlaylists(@RequestBody PlaylistsForm playlistsForm,
-                                  Authentication authentication) {
+    public Object createPlaylists(
+            @RequestBody PlaylistsForm playlistsForm,
+            Authentication authentication
+    ) {
         User pseudoUser = (User) authentication.getPrincipal();
-        Playlist createdPlaylist = playlistsService.create(playlistsForm.getName(), pseudoUser.getId());
+        Playlist createdPlaylist = playlistsService.create(pseudoUser, playlistsForm.getName());
         if (createdPlaylist == null)
             return new ORReject("Не удалось создать плейлист");
         else
@@ -41,7 +50,7 @@ public class PlaylistController {
     @DeleteMapping("/delete")
     public void deletePlaylists(@RequestParam Integer id, Authentication authentication) {
         User pseudoUser = (User) authentication.getPrincipal();
-        playlistsService.deleteById(id, pseudoUser.getId());
+        playlistsService.deleteById(pseudoUser, id);
     }
 
     @GetMapping("/videos")
@@ -54,7 +63,7 @@ public class PlaylistController {
                                    @RequestParam Integer playlistId,
                                    Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        playlistsService.addVideoInPlaylist(videoId, playlistId, user.getId());
+        playlistsService.addVideoInPlaylist(user, videoId, playlistId);
     }
 
     @PostMapping("/delete_video")
@@ -62,6 +71,6 @@ public class PlaylistController {
                                       @RequestParam Integer playlistId,
                                       Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        playlistsService.deleteVideoInPlaylist(videoId, playlistId, user.getId());
+        playlistsService.deleteVideoInPlaylist(user, videoId, playlistId);
     }
 }

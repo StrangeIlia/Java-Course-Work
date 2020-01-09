@@ -15,14 +15,13 @@ import java.util.Date;
 @Entity
 @Table(name = "Playlists")
 public class Playlist implements Serializable {
-    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "createdAt", nullable = false)
     private Date createdAt;
-    @Column(name = "updateAt", nullable = false)
+    @Column(name = "updatedAt", nullable = false)
     private Date updatedAt;
 
     public Playlist()

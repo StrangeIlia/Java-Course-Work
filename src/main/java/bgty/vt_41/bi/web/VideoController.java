@@ -8,16 +8,14 @@ import bgty.vt_41.bi.entity.enums.ERating;
 import bgty.vt_41.bi.service.UserService;
 import bgty.vt_41.bi.service.VideoService;
 import bgty.vt_41.bi.util.FileHelper;
+import bgty.vt_41.bi.util.exceptions.VideoException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Optional;
 
 @RestController
@@ -46,99 +44,57 @@ public class VideoController {
 
     @PostMapping(value = "/create", consumes = "multipart/form-data")
     public ResponseEntity<OperationResult> createVideo(@ModelAttribute VideoForm sendVideo,
-                                                       Authentication authentication)
-    {
-
-        Video savedVideo = new Video();
+                                                       Authentication authentication) {
+        String path = saveVideo(sendVideo.getVideo());
+        String preview = saveVideo(sendVideo.getPreview());
         User user = (User) authentication.getPrincipal();
-        //savedVideo.setAuthor(user); //НИКОГДА НЕ ДЕЛАЕТЕ ТАК
-        userService.findById(user.getId()).ifPresent(savedVideo::setAuthor); //Правильно так
-        /*Optional<User> optionalUser = Optional.ofNullable(user);
-        optionalUser.ifPresent(savedVideo::setAuthor);*/ // Попытка схитрить не удалась ХД (нужно подгружать связи)
-        savedVideo.setName(sendVideo.getName());
-        savedVideo.setDescription(sendVideo.getDescription());
-        savedVideo.setPath(saveVideo(sendVideo.getVideo()));
-        savedVideo.setPreview(savePreview(sendVideo.getPreview()));
         try {
-            if (videoService.save(savedVideo) != null)
-                return ResponseEntity.ok(new ORSuccess());
-            else
-                return ResponseEntity.ok(new ORReject("Не удалось сохранить видео"));
+            videoService.create(
+                    user,
+                    sendVideo.getName(),
+                    sendVideo.getDescription(),
+                    path,
+                    preview
+            );
+            return ResponseEntity.ok(new ORSuccess());
+        } catch (VideoException e) {
+            return ResponseEntity.ok(new ORReject(e.getMessage()));
         }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        if (videoService.save(savedVideo) != null)
-            return new ResponseEntity<>(new ORSuccess(), HttpStatus.OK);
-        else
-            return new ResponseEntity<>(new ORReject("Не удалось сохранить видео"), HttpStatus.OK);
     }
 
     @PatchMapping("/update")
     public ResponseEntity<OperationResult> updateVideo(@RequestParam Integer id,
                                                        @ModelAttribute VideoForm sendVideo,
-                                                       Authentication authentication)
-    {
-        Optional<Video> updatedVideo = videoService.findById(id);
-        if(updatedVideo.isEmpty())
-            return ResponseEntity.ok(new ORReject("Нет видео с таким id"));
-        Video savedVideo = updatedVideo.get();
-        if(!savedVideo.getAuthor().equalsId(authentication.getPrincipal()))
-            return ResponseEntity.ok(new ORReject("У вас нет прав на обновление этого видео"));
-        boolean isUpdated = false;
-        if(sendVideo.getName() != null) {
-            if(!savedVideo.getName().equals(sendVideo.getName())){
-                savedVideo.setName(sendVideo.getName());
-                isUpdated = true;
-            }
-        }
-        if(savedVideo.getDescription() != null || sendVideo.getDescription() != null)
-        {
-            if(savedVideo.getDescription() == null || !savedVideo.getDescription().equals(sendVideo.getDescription()))
-            {
-                savedVideo.setDescription(sendVideo.getDescription());
-                isUpdated = true;
-            }
-        }
-
-        if(sendVideo.getVideo() != null)
-        {
+                                                       Authentication authentication) throws IOException {
+        Optional<Video> optionalVideo = videoService.findById(id);
+        if (optionalVideo.isPresent()) {
+            String path = FileHelper.rebase(sendVideo.getVideo(), optionalVideo.get().getPath());
+            String preview = FileHelper.rebase(sendVideo.getPreview(), optionalVideo.get().getPreview());
+            User user = (User) authentication.getPrincipal();
             try {
-                FileHelper.rebase(sendVideo.getVideo(), savedVideo.getPath());
-                savedVideo.setNumberOfViews(0);
-            } catch (IOException e) {
-                return ResponseEntity.ok(new ORReject("Ошибка при загрузке видео"));
+                Video video = videoService.update(
+                        id,
+                        user,
+                        sendVideo.getName(),
+                        sendVideo.getDescription(),
+                        path,
+                        preview
+                );
+                return ResponseEntity.ok(new UpdateVideoResult(video));
+            } catch (VideoException e) {
+                return ResponseEntity.ok(new ORReject(e.getMessage()));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
-        if(sendVideo.getPreview() != null)
-        {
-            try {
-                FileHelper.rebase(sendVideo.getPreview(), savedVideo.getPreview());
-            } catch (IOException e) {
-                return ResponseEntity.ok(new ORReject("Ошибка при загрузке превью"));
-            }
-        }
-        if(isUpdated)
-        {
-            Date date = new Date();
-            savedVideo.setUpdatedAt(new Timestamp(date.getTime()));
-            savedVideo = videoService.save(savedVideo);
-            if(savedVideo == null)
-                return ResponseEntity.ok(new ORReject("Ошибка при сохранении видео"));
-        }
-        return ResponseEntity.ok(new UpdateVideoResult(savedVideo));
+        return ResponseEntity.ok(new ORReject("Видео с таким id не существует"));
     }
 
     @DeleteMapping("/delete")
     public void deleteVideo(@RequestParam("id") Integer id,
                             Authentication authentication) {
-        Optional<Video> optionalVideo = videoService.findById(id);
-        if (optionalVideo.isPresent()) {
-            Video video = optionalVideo.get();
-            User author = video.getAuthor();
-            if (author.equalsId(authentication.getPrincipal()))
-                videoService.delete(video);
-        }
+        User user = (User) authentication.getPrincipal();
+        videoService.deleteById(user, id);
     }
 
     @GetMapping("/rating")

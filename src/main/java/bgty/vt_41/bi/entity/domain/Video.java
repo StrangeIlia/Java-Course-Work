@@ -38,21 +38,21 @@ public class Video implements Serializable {
     @Column(name = "updatedAt", nullable = false)
     @JsonSerialize(using = DateSerializer.class)
     private Date updatedAt;
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @JoinColumn(name = "author", nullable = false)
+    @JsonSerialize(using = UserSerializer.class)
+    // чтобы было "author" : "<name>" вместо "author" : { "username" : "<name>" }
+    private User author;
 
-    public Video()
-    {
+    public Video() {
         super();
         Date date = new Date();
         createdAt = new Timestamp(date.getTime());
         updatedAt = new Timestamp(date.getTime());
     }
 
-    @ManyToOne(optional = false, fetch = FetchType.EAGER)
-    @JoinColumn(name = "author", nullable = false)
-    @JsonSerialize(using = UserSerializer.class) // чтобы было "author" : "<name>" вместо "author" : { "username" : "<name>" }
-    private User author;
-
-    @OneToMany(mappedBy = "video", fetch = FetchType.LAZY, cascade = CascadeType.ALL) //Если видео удалено, то удаляем все оценки к нему
+    @OneToMany(mappedBy = "video", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    //Если видео удалено, то удаляем все оценки к нему
     @JsonIgnore
     private Collection<Rating> ratings;
 

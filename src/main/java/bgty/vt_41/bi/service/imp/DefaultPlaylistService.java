@@ -52,13 +52,14 @@ public class DefaultPlaylistService implements PlaylistsService {
     }
 
     @Override
-    public void addVideoInPlaylist(Integer videoId, Integer playlistId, Integer userId) {
+    public void addVideoInPlaylist(User user, Integer videoId, Integer playlistId) {
         Optional<Video> optionalVideo = videoRepository.findById(videoId);
         if (optionalVideo.isPresent()) {
             Optional<Playlist> optionalPlaylist = playlistRepository.findById(playlistId);
             if (optionalPlaylist.isPresent()) {
                 Playlist playlist = optionalPlaylist.get();
-                if (playlist.getAuthor().equalsId(userId)) {
+                if (playlist.getAuthor().equalsId(user.getId())) {
+                    playlist.getVideos().size(); //Делаем подгрузку (защита от LAZY)
                     playlist.getVideos().add(optionalVideo.get());
                     playlist.setUpdatedAt(new Date());
                     playlistRepository.save(playlist);
@@ -68,13 +69,14 @@ public class DefaultPlaylistService implements PlaylistsService {
     }
 
     @Override
-    public void deleteVideoInPlaylist(Integer videoId, Integer playlistId, Integer userId) {
+    public void deleteVideoInPlaylist(User user, Integer videoId, Integer playlistId) {
         Optional<Video> optionalVideo = videoRepository.findById(videoId);
         if (optionalVideo.isPresent()) {
             Optional<Playlist> optionalPlaylist = playlistRepository.findById(playlistId);
             if (optionalPlaylist.isPresent()) {
                 Playlist playlist = optionalPlaylist.get();
-                if (playlist.getAuthor().equalsId(userId)) {
+                if (playlist.getAuthor().equalsId(user.getId())) {
+                    playlist.getVideos().size(); //Делаем подгрузку (защита от LAZY)
                     playlist.getVideos().remove(optionalVideo.get());
                     playlist.setUpdatedAt(new Date());
                     playlistRepository.save(playlist);
@@ -109,10 +111,10 @@ public class DefaultPlaylistService implements PlaylistsService {
     }
 
     @Override
-    public Playlist create(String name, Integer userId) {
+    public Playlist create(User user, String name) {
         Playlist playlist = new Playlist();
         playlist.setName(name);
-        userRepository.findById(userId).ifPresent(playlist::setAuthor);
+        playlist.setAuthor(user);
         try {
             return playlistRepository.save(playlist);
         } catch (Exception e) {
@@ -121,9 +123,9 @@ public class DefaultPlaylistService implements PlaylistsService {
     }
 
     @Override
-    public void deleteById(Integer id, Integer userId) {
+    public void deleteById(User user, Integer id) {
         Optional<Playlist> optionalPlaylist = playlistRepository.findById(id);
-        if (optionalPlaylist.isPresent() && optionalPlaylist.get().getAuthor().equalsId(userId))
+        if (optionalPlaylist.isPresent() && optionalPlaylist.get().getAuthor().equalsId(user.getId()))
             playlistRepository.delete(optionalPlaylist.get());
     }
 }

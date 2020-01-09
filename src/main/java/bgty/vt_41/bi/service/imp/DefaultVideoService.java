@@ -8,10 +8,12 @@ import bgty.vt_41.bi.repository.RatingRepository;
 import bgty.vt_41.bi.repository.UserRepository;
 import bgty.vt_41.bi.repository.VideoRepository;
 import bgty.vt_41.bi.service.VideoService;
+import bgty.vt_41.bi.util.exceptions.VideoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -68,7 +70,7 @@ public class DefaultVideoService implements VideoService {
     @Override
     public void removeGrade(User user, Video video) {
         Optional<Rating> optionalRating = ratingRepository.findByUserAndVideo(user, video);
-        if(optionalRating.isPresent()) ratingRepository.delete(optionalRating.get());
+        optionalRating.ifPresent(rating -> ratingRepository.delete(rating));
     }
 
     @Override
@@ -105,8 +107,7 @@ public class DefaultVideoService implements VideoService {
     public void rating(User user, Video video, ERating rating) {
         Optional<Rating> optionalRating = ratingRepository.findByUserAndVideo(user, video);
         if (rating == null) {
-            if (optionalRating.isPresent())
-                ratingRepository.delete(optionalRating.get());
+            optionalRating.ifPresent(value -> ratingRepository.delete(value));
         } else {
             Rating newRating;
             if (optionalRating.isPresent())
@@ -124,7 +125,7 @@ public class DefaultVideoService implements VideoService {
 
     @Override
     public Optional<Rating> isLiked(User user, Video video) {
-        return video.getRatings().stream().filter(x -> x.getUser().equalsId(user)).findFirst();
+        return video.getRatings().stream().filter(x -> x.getUser().equalsId(user.getId())).findFirst();
     }
 
     @Override
@@ -137,5 +138,55 @@ public class DefaultVideoService implements VideoService {
     public long countDisliked(Video video) {
         Collection<Rating> ratings = video.getRatings();
         return ratings.stream().filter(x -> x.getRating().equals(ERating.DISLIKE)).count();
+    }
+
+    @Override
+    public Video create(User user, String name, String description, String path, String preview) throws VideoException {
+        Video video = new Video();
+        if (user == null)
+            throw new VideoException("Не указан пользователь");
+        if (name == null)
+            throw new VideoException("Не указано название видео");
+        if (path == null)
+            throw new VideoException("Не удалось получить файл видео");
+        if (preview == null)
+            throw new VideoException("Не удалось получить файл превью");
+        video.setAuthor(user);
+        video.setName(name);
+        video.setDescription(description);
+        video.setPath(path);
+        video.setPreview(preview);
+        return videoRepository.save(video);
+    }
+
+    @Override
+    public Video update(Integer id, User user, String name, String description, String path, String preview) throws VideoException {
+        Optional<Video> optionalVideo = videoRepository.findById(id);
+        if (optionalVideo.isEmpty())
+            throw new VideoException("Нет видео с таким id");
+        Video video = optionalVideo.get();
+        if (!video.getAuthor().equalsId(user.getId()))
+            throw new VideoException("У вас нет прав, на изменение этого видео");
+
+        if (name == null && description == null && path == null && preview == null)
+            throw new VideoException("Нет данных для изменения");
+
+        if (name != null)
+            video.setName(name);
+        if (path != null)
+            video.setPath(path);
+        if (preview != null)
+            video.setPreview(preview);
+        video.setDescription(description);
+        video.setUpdatedAt(new Date());
+
+        return videoRepository.save(video);
+    }
+
+    @Override
+    public void deleteById(User user, Integer videoId) {
+        Optional<Video> optionalVideo = videoRepository.findById(videoId);
+        if (optionalVideo.isPresent() && optionalVideo.get().getAuthor().equalsId(user.getId()))
+            videoRepository.delete(optionalVideo.get());
     }
 }
