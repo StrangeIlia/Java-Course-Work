@@ -5,7 +5,6 @@ import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.entity.enums.ERating;
 
-import java.util.Collection;
 import java.util.Optional;
 
 public interface VideoService {
@@ -38,6 +37,4 @@ public interface VideoService {
     long countLiked(Video video);
 
     long countDisliked(Video video);
-
-    Collection<Video> getFavorites(User user);
 }

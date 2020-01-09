@@ -20,10 +20,10 @@ public class Playlist implements Serializable {
     private Integer id;
     @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "createdAt",nullable = false)
-    private Timestamp createdAt;
+    @Column(name = "createdAt", nullable = false)
+    private Date createdAt;
     @Column(name = "updateAt", nullable = false)
-    private Timestamp updatedAt;
+    private Date updatedAt;
 
     public Playlist()
     {

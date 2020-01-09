@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class DefaultVideoService implements VideoService {
@@ -138,15 +137,5 @@ public class DefaultVideoService implements VideoService {
     public long countDisliked(Video video) {
         Collection<Rating> ratings = video.getRatings();
         return ratings.stream().filter(x -> x.getRating().equals(ERating.DISLIKE)).count();
-    }
-
-    @Override
-    public Collection<Video> getFavorites(User user) {
-        return user
-                .getRatings()
-                .stream()
-                .filter(x -> x.getRating() == ERating.LIKE)
-                .map(Rating::getVideo)
-                .collect(Collectors.toList());
     }
 }

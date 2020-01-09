@@ -37,10 +37,10 @@ public class User implements UserDetails, Serializable {
     private String password;
     @Column(nullable = false)
     @JsonIgnore
-    private Timestamp createdAt;
+    private Date createdAt;
     @Column(nullable = false)
     @JsonIgnore
-    private Timestamp updatedAt;
+    private Date updatedAt;
     @JsonIgnore
     @Column(length = 36)
     private String authKey;

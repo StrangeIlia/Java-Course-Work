@@ -34,10 +34,10 @@ public class Video implements Serializable {
     private Integer numberOfViews = 0;
     @Column(name = "createdAt", nullable = false)
     @JsonSerialize(using = DateSerializer.class)
-    private Timestamp createdAt;
+    private Date createdAt;
     @Column(name = "updatedAt", nullable = false)
     @JsonSerialize(using = DateSerializer.class)
-    private Timestamp updatedAt;
+    private Date updatedAt;
 
     public Video()
     {

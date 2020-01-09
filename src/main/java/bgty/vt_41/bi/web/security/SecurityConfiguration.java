@@ -32,7 +32,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             new AntPathRequestMatcher("/api/videos/rating", "POST"),
             new AntPathRequestMatcher("/api/videos/liked"),
             new AntPathRequestMatcher("/api/site/get_username"),
-            new AntPathRequestMatcher("/api/site/logout")
+            new AntPathRequestMatcher("/api/site/logout"),
+            new AntPathRequestMatcher("/api/playlists/create"),
+            new AntPathRequestMatcher("/api/playlists/delete"),
+            new AntPathRequestMatcher("/api/playlists/add_video"),
+            new AntPathRequestMatcher("/api/playlists/delete_video")
     );
 
     AuthenticationProvider provider;

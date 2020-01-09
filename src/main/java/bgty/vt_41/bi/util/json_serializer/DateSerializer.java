@@ -5,13 +5,13 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
-public class DateSerializer extends JsonSerializer<Timestamp> {
+public class DateSerializer extends JsonSerializer<Date> {
     @Override
-    public void serialize(Timestamp datetime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+    public void serialize(Date datetime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("d MMM yyyy", new Locale("rus"));
         jsonGenerator.writeObject(dateFormat.format(datetime));
     }
