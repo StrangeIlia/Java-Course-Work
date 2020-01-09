@@ -32,7 +32,7 @@ public class Playlist implements Serializable {
         updatedAt = new Timestamp(date.getTime());
     }
 
-    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "author", nullable = false)
     @JsonSerialize(using = UserSerializer.class)
     private User author;

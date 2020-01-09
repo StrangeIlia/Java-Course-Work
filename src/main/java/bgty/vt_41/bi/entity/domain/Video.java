@@ -39,7 +39,7 @@ public class Video implements Serializable {
     @Column(name = "updatedAt", nullable = false)
     @JsonSerialize(using = DateSerializer.class)
     private Date updatedAt;
-    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "author", nullable = false)
     @JsonSerialize(using = UserSerializer.class)
     // чтобы было "author" : "<name>" вместо "author" : { "username" : "<name>" }
@@ -57,7 +57,7 @@ public class Video implements Serializable {
     @JsonIgnore
     private Collection<Rating> ratings;
 
-    @ManyToMany(mappedBy = "videos")
+    @ManyToMany(mappedBy = "videos", fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<Playlist> playlists;
 

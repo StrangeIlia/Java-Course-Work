@@ -14,11 +14,11 @@ import java.io.Serializable;
 @IdClass(VideoUserKey.class)
 public class Rating implements Serializable {
     @Id
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", nullable = false, referencedColumnName = "id")
     private User user;
     @Id
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "videoId", nullable = false, referencedColumnName = "id")
     private Video video;
     @Column(name = "rating", nullable = false)

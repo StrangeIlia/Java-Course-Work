@@ -1,12 +1,14 @@
 package bgty.vt_41.bi.service.imp;
 
 import bgty.vt_41.bi.entity.domain.Playlist;
+import bgty.vt_41.bi.entity.domain.Rating;
 import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.repository.PlaylistRepository;
 import bgty.vt_41.bi.repository.UserRepository;
 import bgty.vt_41.bi.repository.VideoRepository;
 import bgty.vt_41.bi.service.PlaylistsService;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,14 +57,24 @@ public class DefaultPlaylistService implements PlaylistsService {
     public void addVideoInPlaylist(User user, Integer videoId, Integer playlistId) {
         Optional<Video> optionalVideo = videoRepository.findById(videoId);
         if (optionalVideo.isPresent()) {
+            Video video = optionalVideo.get();
             Optional<Playlist> optionalPlaylist = playlistRepository.findById(playlistId);
             if (optionalPlaylist.isPresent()) {
                 Playlist playlist = optionalPlaylist.get();
                 if (playlist.getAuthor().equalsId(user.getId())) {
-                    playlist.getVideos().size(); //Делаем подгрузку (защита от LAZY)
-                    playlist.getVideos().add(optionalVideo.get());
+                    Hibernate.initialize(playlist);
+                    Hibernate.initialize(video);
+                    Hibernate.initialize(video.getAuthor());
+                    for (Rating rating : video.getRatings())
+                        Hibernate.initialize(rating);
+
+                    playlist.getVideos().add(video);
                     playlist.setUpdatedAt(new Date());
-                    playlistRepository.save(playlist);
+                    try {
+                        playlistRepository.save(playlist);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -72,11 +84,13 @@ public class DefaultPlaylistService implements PlaylistsService {
     public void deleteVideoInPlaylist(User user, Integer videoId, Integer playlistId) {
         Optional<Video> optionalVideo = videoRepository.findById(videoId);
         if (optionalVideo.isPresent()) {
+            Video video = optionalVideo.get();
             Optional<Playlist> optionalPlaylist = playlistRepository.findById(playlistId);
             if (optionalPlaylist.isPresent()) {
                 Playlist playlist = optionalPlaylist.get();
                 if (playlist.getAuthor().equalsId(user.getId())) {
                     playlist.getVideos().size(); //Делаем подгрузку (защита от LAZY)
+                    video.getPlaylists().size(); //Делаем подгрузку (защита от LAZY)
                     playlist.getVideos().remove(optionalVideo.get());
                     playlist.setUpdatedAt(new Date());
                     playlistRepository.save(playlist);
