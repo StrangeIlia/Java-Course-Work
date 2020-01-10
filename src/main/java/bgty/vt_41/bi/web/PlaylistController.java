@@ -59,11 +59,14 @@ public class PlaylistController {
     }
 
     @PostMapping("/add_video")
-    public void addVideoInPlaylist(@RequestParam Integer videoId,
-                                   @RequestParam Integer playlistId,
-                                   Authentication authentication) {
+    public Object addVideoInPlaylist(@RequestParam Integer videoId,
+                                     @RequestParam Integer playlistId,
+                                     Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         playlistsService.addVideoInPlaylist(user, videoId, playlistId);
+        return new Object() {
+            public String status = EStatus.SUCCESS.toString().toLowerCase();
+        };
     }
 
     @PostMapping("/delete_video")

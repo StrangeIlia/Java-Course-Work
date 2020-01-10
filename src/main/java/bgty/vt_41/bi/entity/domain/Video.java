@@ -7,6 +7,7 @@ import bgty.vt_41.bi.util.json_serializer.UserSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -16,6 +17,7 @@ import java.util.Date;
 
 @Data
 @Entity
+@EqualsAndHashCode
 @Table(name = "Videos")
 public class Video implements Serializable {
     @Id
@@ -39,18 +41,11 @@ public class Video implements Serializable {
     @Column(name = "updatedAt", nullable = false)
     @JsonSerialize(using = DateSerializer.class)
     private Date updatedAt;
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "author", nullable = false)
     @JsonSerialize(using = UserSerializer.class)
     // чтобы было "author" : "<name>" вместо "author" : { "username" : "<name>" }
     private User author;
-
-    public Video() {
-        super();
-        Date date = new Date();
-        createdAt = new Timestamp(date.getTime());
-        updatedAt = new Timestamp(date.getTime());
-    }
 
     @OneToMany(mappedBy = "video", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     //Если видео удалено, то удаляем все оценки к нему
@@ -61,12 +56,17 @@ public class Video implements Serializable {
     @JsonIgnore
     private Collection<Playlist> playlists;
 
+    public Video() {
+        super();
+        Date date = new Date();
+        createdAt = new Timestamp(date.getTime());
+        updatedAt = new Timestamp(date.getTime());
+    }
+
     @JsonIgnore
-    public boolean equalsId(Object object)
-    {
-        if(this == object) return true;
-        if(object instanceof Video)
-        {
+    public boolean equalsId(Object object) {
+        if (this == object) return true;
+        if (object instanceof Video) {
             Video tmp = (Video) object;
             return tmp.getId().equals(this.getId());
         }

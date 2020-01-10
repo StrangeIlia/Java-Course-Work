@@ -1,14 +1,12 @@
 package bgty.vt_41.bi.service.imp;
 
 import bgty.vt_41.bi.entity.domain.Playlist;
-import bgty.vt_41.bi.entity.domain.Rating;
 import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 import bgty.vt_41.bi.repository.PlaylistRepository;
 import bgty.vt_41.bi.repository.UserRepository;
 import bgty.vt_41.bi.repository.VideoRepository;
 import bgty.vt_41.bi.service.PlaylistsService;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,15 +60,9 @@ public class DefaultPlaylistService implements PlaylistsService {
             if (optionalPlaylist.isPresent()) {
                 Playlist playlist = optionalPlaylist.get();
                 if (playlist.getAuthor().equalsId(user.getId())) {
-                    Hibernate.initialize(playlist);
-                    Hibernate.initialize(video);
-                    Hibernate.initialize(video.getAuthor());
-                    for (Rating rating : video.getRatings())
-                        Hibernate.initialize(rating);
-
-                    playlist.getVideos().add(video);
-                    playlist.setUpdatedAt(new Date());
                     try {
+                        playlist.setUpdatedAt(new Date());
+                        playlist.getVideos().add(video);
                         playlistRepository.save(playlist);
                     } catch (Exception e) {
                         e.printStackTrace();

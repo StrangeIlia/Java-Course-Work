@@ -4,6 +4,7 @@ package bgty.vt_41.bi.entity.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Data
 @Entity
+@EqualsAndHashCode
 @Table(name = "Users",
         uniqueConstraints = @UniqueConstraint(columnNames = {"email"}))
 public class User implements UserDetails, Serializable {
@@ -48,7 +50,8 @@ public class User implements UserDetails, Serializable {
     @Column(length = 36)
     private String accessToken;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL) //Если удален пользователь, то удаляем все видео
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    //Если удален пользователь, то удаляем все видео
     @JsonIgnore
     private Collection<Video> loadedVideo;
 

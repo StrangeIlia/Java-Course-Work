@@ -4,6 +4,7 @@ import bgty.vt_41.bi.util.json_serializer.UserSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.util.Date;
 
 @Data
 @Entity
+@EqualsAndHashCode
 @Table(name = "Playlists")
 public class Playlist implements Serializable {
     @Id
@@ -25,14 +27,7 @@ public class Playlist implements Serializable {
     @Column(name = "updatedAt", nullable = false)
     private Date updatedAt;
 
-    public Playlist()
-    {
-        Date date = new Date();
-        createdAt = new Timestamp(date.getTime());
-        updatedAt = new Timestamp(date.getTime());
-    }
-
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "author", nullable = false)
     @JsonSerialize(using = UserSerializer.class)
     private User author;
@@ -40,16 +35,20 @@ public class Playlist implements Serializable {
     @ManyToMany(fetch = FetchType.LAZY)
     @JsonIgnore
     @JoinTable(name = "VideoPlaylists",
-            joinColumns = @JoinColumn(name = "playlistId", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "videoId", nullable = false))
+            joinColumns = {@JoinColumn(name = "playlistId", nullable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "videoId", nullable = false)})
     private Collection<Video> videos;
 
+    public Playlist() {
+        Date date = new Date();
+        createdAt = new Timestamp(date.getTime());
+        updatedAt = new Timestamp(date.getTime());
+    }
+
     @JsonIgnore
-    public boolean equalsId(Object object)
-    {
-        if(this == object) return true;
-        if(object instanceof Playlist)
-        {
+    public boolean equalsId(Object object) {
+        if (this == object) return true;
+        if (object instanceof Playlist) {
             Playlist tmp = (Playlist) object;
             return tmp.getId().equals(this.getId());
         }
