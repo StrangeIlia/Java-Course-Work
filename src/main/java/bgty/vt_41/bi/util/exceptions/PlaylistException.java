@@ -1,11 +1,11 @@
 package bgty.vt_41.bi.util.exceptions;
 
-public class VideoException extends Exception {
-    public VideoException() {
+public class PlaylistException extends Exception {
+    public PlaylistException() {
         super("Неизвестная ошибка");
     }
 
-    public VideoException(String message) {
+    public PlaylistException(String message) {
         super(message);
     }
 }

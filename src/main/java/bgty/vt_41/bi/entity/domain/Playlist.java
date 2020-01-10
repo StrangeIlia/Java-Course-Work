@@ -20,7 +20,7 @@ public class Playlist implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", length = 30, nullable = false)
     private String name;
     @Column(name = "createdAt", nullable = false)
     private Date createdAt;

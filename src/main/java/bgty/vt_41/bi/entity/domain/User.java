@@ -21,7 +21,7 @@ import java.util.UUID;
 @Entity
 @EqualsAndHashCode
 @Table(name = "Users",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"email"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"email", "username"}))
 public class User implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

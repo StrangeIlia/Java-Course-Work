@@ -7,6 +7,7 @@ import bgty.vt_41.bi.repository.PlaylistRepository;
 import bgty.vt_41.bi.repository.UserRepository;
 import bgty.vt_41.bi.repository.VideoRepository;
 import bgty.vt_41.bi.service.PlaylistsService;
+import bgty.vt_41.bi.util.exceptions.PlaylistException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +52,7 @@ public class DefaultPlaylistService implements PlaylistsService {
     }
 
     @Override
-    public void addVideoInPlaylist(User user, Integer videoId, Integer playlistId) {
+    public void addVideoInPlaylist(User user, Integer videoId, Integer playlistId) throws PlaylistException {
         Optional<Video> optionalVideo = videoRepository.findById(videoId);
         if (optionalVideo.isPresent()) {
             Video video = optionalVideo.get();
@@ -59,16 +60,19 @@ public class DefaultPlaylistService implements PlaylistsService {
             if (optionalPlaylist.isPresent()) {
                 Playlist playlist = optionalPlaylist.get();
                 if (playlist.getAuthor().equalsId(user.getId())) {
+                    if (playlist.getVideos().contains(video))
+                        throw new PlaylistException("Видео уже есть в этом плейлисте");
                     try {
                         playlist.setUpdatedAt(new Date());
                         playlist.getVideos().add(video);
                         playlistRepository.save(playlist);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        throw new PlaylistException("Ошибка при сохранении");
                     }
                 }
-            }
-        }
+            } else throw new PlaylistException("Плейлиста с таким id не существует");
+        } else throw new PlaylistException("Видео с таким id не существует");
     }
 
     @Override
@@ -80,8 +84,6 @@ public class DefaultPlaylistService implements PlaylistsService {
             if (optionalPlaylist.isPresent()) {
                 Playlist playlist = optionalPlaylist.get();
                 if (playlist.getAuthor().equalsId(user.getId())) {
-                    playlist.getVideos().size(); //Делаем подгрузку (защита от LAZY)
-                    video.getPlaylists().size(); //Делаем подгрузку (защита от LAZY)
                     playlist.getVideos().remove(optionalVideo.get());
                     playlist.setUpdatedAt(new Date());
                     playlistRepository.save(playlist);

@@ -12,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 @RestController
 @RequestMapping("api/users")
@@ -75,7 +77,19 @@ public class UserController {
     }
 
     @GetMapping("/playlists")
-    public Collection<Playlist> getCreatedPlaylists(@RequestParam String username) {
-        return userService.getCreatedPlaylists(username);
+    public Collection<Object> getCreatedPlaylists(@RequestParam String username) {
+        Collection<Playlist> playlistCollection = userService.getCreatedPlaylists(username);
+        Collection<Object> result = new ArrayList<>(playlistCollection.size());
+        for (Playlist playlist : playlistCollection) {
+            result.add(new Object() {
+                public Integer id = playlist.getId();
+                public String name = playlist.getName();
+                public Date createdAt = playlist.getCreatedAt();
+                public Date updatedAt = playlist.getUpdatedAt();
+                public String author = playlist.getAuthor().getUsername();
+                public Integer countVideo = playlist.getVideos().size();
+            });
+        }
+        return result;
     }
 }

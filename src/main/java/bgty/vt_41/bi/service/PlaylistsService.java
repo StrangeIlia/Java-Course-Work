@@ -3,6 +3,7 @@ package bgty.vt_41.bi.service;
 import bgty.vt_41.bi.entity.domain.Playlist;
 import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
+import bgty.vt_41.bi.util.exceptions.PlaylistException;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public interface PlaylistsService {
 
     Collection<Video> findVideosById(Integer id);
 
-    void addVideoInPlaylist(User user, Integer videoId, Integer playlistId);
+    void addVideoInPlaylist(User user, Integer videoId, Integer playlistId) throws PlaylistException;
 
     void deleteVideoInPlaylist(User user, Integer videoId, Integer playlistId);
 }

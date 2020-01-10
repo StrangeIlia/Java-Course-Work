@@ -7,6 +7,7 @@ import bgty.vt_41.bi.entity.dto.ORReject;
 import bgty.vt_41.bi.entity.dto.PlaylistsForm;
 import bgty.vt_41.bi.entity.enums.EStatus;
 import bgty.vt_41.bi.service.PlaylistsService;
+import bgty.vt_41.bi.util.exceptions.PlaylistException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -63,17 +64,36 @@ public class PlaylistController {
                                      @RequestParam Integer playlistId,
                                      Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        playlistsService.addVideoInPlaylist(user, videoId, playlistId);
-        return new Object() {
-            public String status = EStatus.SUCCESS.toString().toLowerCase();
-        };
+        try {
+            playlistsService.addVideoInPlaylist(user, videoId, playlistId);
+            return new Object() {
+                public String status = EStatus.SUCCESS.toString().toLowerCase();
+            };
+        } catch (PlaylistException e) {
+            return new Object() {
+                public String status = EStatus.REJECT.toString().toLowerCase();
+                public String error = e.getMessage();
+            };
+        }
     }
 
-    @PostMapping("/delete_video")
-    public void deleteVideoInPlaylist(@RequestParam Integer videoId,
-                                      @RequestParam Integer playlistId,
-                                      Authentication authentication) {
+    @DeleteMapping("/delete_video")
+    public Object deleteVideoInPlaylist(@RequestParam Integer videoId,
+                                        @RequestParam Integer playlistId,
+                                        Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        playlistsService.deleteVideoInPlaylist(user, videoId, playlistId);
+        try {
+            playlistsService.deleteVideoInPlaylist(user, videoId, playlistId);
+            return new Object() {
+                public String status = EStatus.SUCCESS.toString().toLowerCase();
+            };
+        } catch (Exception e) {
+
+            return new Object() {
+                public String status = EStatus.REJECT.toString().toLowerCase();
+                public String error = "Не удалось удалить видео из плейлиста";
+            };
+        }
+
     }
 }
