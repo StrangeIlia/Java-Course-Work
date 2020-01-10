@@ -8,11 +8,12 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Collection;
 
 @Repository
 public interface PlaylistRepository extends CrudRepository<Playlist, Integer> {
-    List<Playlist> findByAuthor(User user);
+    Collection<Playlist> findByAuthor(User user);
+
     @Query(value = "SELECT p.* FROM VideoPlaylists vp inner join Playlist p WHERE vp.video = :video", nativeQuery = true)
-    List<Playlist> findByVideo(@Param("video") Video video);
+    Collection<Playlist> findByVideo(@Param("video") Video video);
 }

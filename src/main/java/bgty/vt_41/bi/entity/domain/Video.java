@@ -33,7 +33,7 @@ public class Video implements Serializable {
     @Column(name = "preview", length = 100, nullable = false)
     @JsonSerialize(using = PathFilesSerializer.class)
     private String preview;
-    @Column(name = "numberOfViews", columnDefinition = "int default 0")
+    @Column(name = "numberOfViews", columnDefinition = "int default 0", nullable = false)
     private Integer numberOfViews = 0;
     @Column(name = "createdAt", nullable = false)
     @JsonSerialize(using = DateSerializer.class)

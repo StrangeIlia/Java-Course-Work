@@ -27,13 +27,13 @@ public class User implements UserDetails, Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Integer id;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     @NotBlank
     private String username;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     @JsonIgnore
     private String email;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     @JsonIgnore
     @Setter(AccessLevel.NONE)
     private String password;
@@ -44,10 +44,10 @@ public class User implements UserDetails, Serializable {
     @JsonIgnore
     private Date updatedAt;
     @JsonIgnore
-    @Column(length = 36)
+    @Column(nullable = false, length = 36)
     private String authKey;
     @JsonIgnore
-    @Column(length = 36)
+    @Column(nullable = false, length = 36)
     private String accessToken;
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,7 +24,7 @@ public class DefaultPlaylistService implements PlaylistsService {
     UserRepository userRepository;
 
     @Override
-    public List<Playlist> findByAuthor(User user) {
+    public Collection<Playlist> findByAuthor(User user) {
         return playlistRepository.findByAuthor(user);
     }
 
@@ -35,7 +34,7 @@ public class DefaultPlaylistService implements PlaylistsService {
     }
 
     @Override
-    public List<Playlist> findByVideo(Video video) {
+    public Collection<Playlist> findByVideo(Video video) {
         return playlistRepository.findByVideo(video);
     }
 

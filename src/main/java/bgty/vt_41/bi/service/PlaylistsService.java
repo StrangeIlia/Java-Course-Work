@@ -5,15 +5,14 @@ import bgty.vt_41.bi.entity.domain.User;
 import bgty.vt_41.bi.entity.domain.Video;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 public interface PlaylistsService {
-    List<Playlist> findByAuthor(User user);
+    Collection<Playlist> findByAuthor(User user);
 
     Optional<Playlist> findById(Integer id);
 
-    List<Playlist> findByVideo(Video video);
+    Collection<Playlist> findByVideo(Video video);
 
     long count();
 
